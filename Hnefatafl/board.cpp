@@ -387,7 +387,7 @@ bool Board::checkCheckMate(short kingsX, short kingsY)
                 left = true;
             }
         }
-    }git
+    }
     else
     {
         left = true;

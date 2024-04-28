@@ -32,7 +32,7 @@ class Board
         Board(short width, short height);
         ~Board();
     
-        void printBoard();
+        void printBoard(short attackerCaptured, short defenderCaptured);
         Player* getPlayer();
     
         void matchPieces(Player* attacker, Defender* defender);

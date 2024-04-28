@@ -25,6 +25,8 @@ class Game
         Board* board;
         short playerTurn;
         bool gameIsRunning;
+        short attackerCaptured;
+        short defenderCaptured;
     
         void gameLoop();
         void printGame();

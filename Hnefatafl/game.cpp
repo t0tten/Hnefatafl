@@ -21,6 +21,8 @@
 Game::Game()
 {
     this->logger = Logger::GetInstance();
+    this->attackerCaptured = 0;
+    this->defenderCaptured = 0;
     
     this->playerTurn = 0;
     this->gameIsRunning = true;
@@ -48,9 +50,9 @@ void Game::gameLoop()
     Player* playerTurn = this->attacker;
     while (gameIsRunning)
     {
-        std::cout << "\n\n" << std::string(CLS) << "     " << std::string(RED_BOLD) << "H N E F A T A F L" << std::string(RESET_REGULAR) << std::endl;
+        std::cout << "\n\n" << std::string(CLS) << "      " << std::string(RED_BOLD) << "H N E F A T A F L" << std::string(RESET_REGULAR) << std::endl;
         this->processInput(playerTurn, input);
-        this->board->printBoard();
+        this->board->printBoard(this->attackerCaptured, this->defenderCaptured);
         if (gameIsRunning)
         {
             if ((this->playerTurn % 2) == 0)
@@ -148,6 +150,13 @@ void Game::processInput(Player* playerTurn, std::string input)
                                     }
                                     
                                     this->board->removePiece(removeX, removeY);
+                                    if (isDefender)
+                                    {
+                                        this->attackerCaptured++;
+                                    } else
+                                    {
+                                        this->defenderCaptured++;
+                                    }
                                     message += " CAPTURED " + opponent->getColor() + opponent->getName() + "S" +  + RESET_REGULAR + " PIECE AT COORD (" + std::to_string(removeX) + "," + std::to_string(removeY) + ")";
                                 } else {
                                     message += " MOVED (" + std::to_string(std::stoi(moveFrom.at(0))) + "," + std::to_string(std::stoi(moveFrom.at(1)))+ ") TO (" + std::to_string(std::stoi(moveTo.at(0))) + "," + std::to_string(std::stoi(moveTo.at(1))) + ")";

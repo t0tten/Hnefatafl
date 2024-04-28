@@ -8,6 +8,8 @@
 #include "board.hpp"
 #include <iostream>
 
+#define GREEN_BOLD      "\033[1;32m"
+#define BLUE_BOLD       "\033[1;94m"
 #define CYAN_REGULAR    "\033[0;96m"
 #define RESET_REGULAR   "\033[0m"
 
@@ -49,9 +51,9 @@ Board::~Board()
     delete this->board;
 }
 
-void Board::printBoard()
+void Board::printBoard(short attackerCaptured, short defenderCaptured)
 {
-    std::cout << "  ";
+    std::cout << "   ";
     for (int x = 0; x < this->width; x++)
     {
         std::cout << " " << x;
@@ -60,7 +62,7 @@ void Board::printBoard()
 
     for (int y = 0; y < this->height; y++)
     {
-        std::string padding = "";
+        std::string padding = " ";
         if (y < 10) {
             padding += " ";
         }
@@ -82,7 +84,35 @@ void Board::printBoard()
             }
             std::cout << "|";
         }
+        if (y == 0)
+        {
+            std::cout << " ATTACKER";
+        }
+        if (y == 1)
+        {
+            std::cout << " [" << std::string(BLUE_BOLD);
+            for (int i = 0; i < attackerCaptured; i++)
+            {
+                std::cout << "!";
+            }
+            std::cout << std::string(RESET_REGULAR) << "]";
+        }
+        if (y == 3)
+        {
+            std::cout << " DEFENDER";
+        }
+        if (y == 4)
+        {
+            std::cout << " [" << std::string(GREEN_BOLD);
+            for (int i = 0; i < defenderCaptured; i++)
+            {
+                std::cout << "!";
+            }
+            std::cout << std::string(RESET_REGULAR) << "]";
+        }
         std::cout << std::endl;
+        
+        
     }
 }
 

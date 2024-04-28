@@ -347,6 +347,10 @@ bool Board::checkCheckMate(short kingsX, short kingsY)
             }
         }
     }
+    else
+    {
+        top = true;
+    }
     
     if ((kingsY + 1) < this->height)
     {
@@ -356,6 +360,9 @@ bool Board::checkCheckMate(short kingsX, short kingsY)
                 right = true;
             }
         }
+    }
+    else {
+        right = true;
     }
     
     if ((kingsX + 1) < this->width)
@@ -367,6 +374,10 @@ bool Board::checkCheckMate(short kingsX, short kingsY)
             }
         }
     }
+    else
+    {
+        bottom = true;
+    }
     
     if ((kingsY - 1) >= 0)
     {
@@ -376,6 +387,10 @@ bool Board::checkCheckMate(short kingsX, short kingsY)
                 left = true;
             }
         }
+    }git
+    else
+    {
+        left = true;
     }
     
     if (top && right && bottom && left) return true;
@@ -411,7 +426,9 @@ bool Board::checkCaptureAbove(bool isDefender, short toX, short toY)
 {
     if ((toY - 2) >= 0)
     {
-        if ((this->board[toX][toY - 1] != nullptr) && (this->board[toX][toY - 1]->isDefender() != isDefender))
+        if ((this->board[toX][toY - 1] != nullptr) &&
+            (this->board[toX][toY - 1]->isDefender() != isDefender) &&
+            !this->board[toX][toY - 1]->isKing())
         {
             if ((this->board[toX][toY - 2] != nullptr) && (this->board[toX][toY - 2]->isDefender() == isDefender))
             {
@@ -426,7 +443,9 @@ bool Board::checkCaptureBelow(bool isDefender, short toX, short toY)
 {
     if ((toY + 2) < this->height)
     {
-        if ((this->board[toX][toY + 1] != nullptr) && (this->board[toX][toY + 1]->isDefender() != isDefender))
+        if ((this->board[toX][toY + 1] != nullptr) &&
+            (this->board[toX][toY + 1]->isDefender() != isDefender) &&
+            !this->board[toX][toY + 1]->isKing())
         {
             if ((this->board[toX][toY + 2] != nullptr) && (this->board[toX][toY + 2]->isDefender() == isDefender))
             {
@@ -441,7 +460,9 @@ bool Board::checkCaptureRight(bool isDefender, short toX, short toY)
 {
     if ((toX + 2) < this->width)
     {
-        if ((this->board[toX + 1][toY] != nullptr) && (this->board[toX + 1][toY]->isDefender() != isDefender))
+        if ((this->board[toX + 1][toY] != nullptr) && 
+            (this->board[toX + 1][toY]->isDefender() != isDefender) &&
+            !this->board[toX + 1][toY]->isKing())
         {
             if ((this->board[toX + 2][toY] != nullptr) && (this->board[toX + 2][toY]->isDefender() == isDefender))
             {
@@ -456,7 +477,9 @@ bool Board::checkCaptureLeft(bool isDefender, short toX, short toY)
 {
     if ((toX - 2) >= 0)
     {
-        if ((this->board[toX - 1][toY] != nullptr) && (this->board[toX - 1][toY]->isDefender() != isDefender))
+        if ((this->board[toX - 1][toY] != nullptr) &&
+            (this->board[toX - 1][toY]->isDefender() != isDefender) &&
+            !this->board[toX - 1][toY]->isKing())
         {
             if ((this->board[toX - 2][toY] != nullptr) && (this->board[toX - 2][toY]->isDefender() == isDefender))
             {

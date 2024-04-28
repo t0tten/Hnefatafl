@@ -11,11 +11,8 @@
 #define GREEN_BOLD      "\033[1;32m"
 #define BLUE_BOLD       "\033[1;94m"
 #define CYAN_REGULAR    "\033[0;96m"
+#define BG_WHITE        "\033[0;100m"
 #define RESET_REGULAR   "\033[0m"
-
-//#define CYAN_REGULAR    ""
-//#define RESET_REGULAR   ""
-
 
 Board::Board(short width, short height)
 {
@@ -78,7 +75,7 @@ void Board::printBoardHeader()
     }
 }
 
-void Board::printBoard(short attackerCaptured, short defenderCaptured)
+void Board::printBoard(std::vector<short> moveCoords, short attackerCaptured, short defenderCaptured)
 {
     this->printBoardHeader();
     for (int y = 0; y < this->height; y++)
@@ -92,15 +89,46 @@ void Board::printBoard(short attackerCaptured, short defenderCaptured)
         
         for (int x = 0; x < this->width; x++)
         {
+            // Background tracing
+            std::string bgMove = "";
+            if (moveCoords.at(0) != -1)
+            {
+                short xMove = moveCoords.at(0) - moveCoords.at(2);
+                short yMove = moveCoords.at(1) - moveCoords.at(3);
+                bool setBG = false;
+                if (xMove != 0)
+                {
+                    if ((y == moveCoords.at(1) && x > moveCoords.at(0) && x < moveCoords.at(2)) ||
+                        (y == moveCoords.at(1) && x > moveCoords.at(2) && x < moveCoords.at(0)))
+                    {
+                        setBG = true;
+                    }
+                }
+                
+                if (yMove != 0)
+                {
+                    if ((x == moveCoords.at(0) && y > moveCoords.at(1) && y < moveCoords.at(3)) ||
+                        (x == moveCoords.at(0) && y > moveCoords.at(3) && y < moveCoords.at(1)))
+                    {
+                        setBG = true;
+                    }
+                }
+                
+                if ((x == moveCoords.at(0) && y == moveCoords.at(1)) ||
+                    (x == moveCoords.at(2) && y == moveCoords.at(3)) || setBG)
+                {
+                    bgMove = std::string(BG_WHITE);
+                }
+            }
             Piece* piece = this->board[x][y];
             if (piece != nullptr)
             {
-                std::cout << this->board[x][y]->getColor() << this->board[x][y]->getSign() << std::string(RESET_REGULAR);
+                std::cout << bgMove << this->board[x][y]->getColor() << this->board[x][y]->getSign() << std::string(RESET_REGULAR);
             } else {
                 if (this->isKingsSquare(x, y)) {
                     std::cout << std::string(CYAN_REGULAR) + "X" + std::string(RESET_REGULAR);
                 } else {
-                    std::cout << "_";
+                    std::cout << bgMove << "_" << std::string(RESET_REGULAR);
                 }
             }
             std::cout << "|";

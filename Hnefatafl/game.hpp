@@ -33,7 +33,7 @@ class Game
         void gameLoop();
         void printGame();
         std::string gatherInput(Player* playerTurn);
-        void processInput(Player* playerTurn, std::string input);
+        std::vector<short> processInput(Player* playerTurn, std::string input);
     
     public:
         Game(short width, short height);

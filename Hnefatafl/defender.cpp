@@ -9,7 +9,6 @@
 #include <iostream>
 
 #define GREEN_BOLD "\033[1;32m"
-//#define GREEN_BOLD ""
 
 Defender::Defender(short sizeWarriors, short width, short height) : Player(sizeWarriors, std::string(GREEN_BOLD), true, width, height)
 {

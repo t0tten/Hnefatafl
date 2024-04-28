@@ -10,13 +10,8 @@
 #include <regex>
 
 #define RED_BOLD        "\033[1;31m"
-//#define RED_BOLD        ""
-
-#define RESET_REGULAR "\033[0m"
-//#define RESET_REGULAR ""
-
+#define RESET_REGULAR   "\033[0m"
 #define CLS             "\x1B[2J\x1B[H"
-//#define CLS             ""
 
 Game::Game(short width, short height)
 {
@@ -60,8 +55,8 @@ void Game::gameLoop()
         for (int i = 0; i < ((this->width/2) + titleAdding); i++) padding += " ";
         std::cout << std::string(CLS) << "\n" << padding << std::string(RED_BOLD) << title << std::string(RESET_REGULAR) << std::endl;
         
-        this->processInput(playerTurn, input);
-        this->board->printBoard(this->attackerCaptured, this->defenderCaptured);
+        std::vector<short> moveCoords = this->processInput(playerTurn, input);
+        this->board->printBoard(moveCoords, this->attackerCaptured, this->defenderCaptured);
         if (gameIsRunning)
         {
             if ((this->playerTurn % 2) == 0)
@@ -87,10 +82,11 @@ std::string Game::gatherInput(Player* playerTurn)
     return input;
 }
 
-void Game::processInput(Player* playerTurn, std::string input)
+std::vector<short> Game::processInput(Player* playerTurn, std::string input)
 {
     std::cout << "\nInput: " << input << std::endl;
     std::string message = "";
+    std::vector<short> moveCoords = {-1, -1, -1, -1};
     if (std::regex_match(input, std::regex("[ ]*[0-9]+[ ]*,[ ]*[0-9]+[ ]*-[ ]*>[ ]*[0-9]+[ ]*,[ ]*[0-9]+[ ]*")))
     {
         message = playerTurn->getColor() + playerTurn->getName() + std::string(RESET_REGULAR);
@@ -108,8 +104,15 @@ void Game::processInput(Player* playerTurn, std::string input)
         
         // Get coords
         std::vector<std::string> coords = this->splitString(sanitized, "->");
+        
         std::vector<std::string> moveFrom = this->splitString(coords.at(0), ",");
+        moveCoords[0] = std::stoi(moveFrom.at(0));
+        moveCoords[1] = std::stoi(moveFrom.at(1));
+        
         std::vector<std::string> moveTo = this->splitString(coords.at(1), ",");
+        moveCoords[2] = std::stoi(moveTo.at(0));
+        moveCoords[3] = std::stoi(moveTo.at(1));
+        
         
         Defender* defender = dynamic_cast<Defender*>(playerTurn);
         bool isDefender = (defender != nullptr) ? true : false;
@@ -215,6 +218,7 @@ void Game::processInput(Player* playerTurn, std::string input)
         }
     }
     std::cout << "Message: " << message << std::endl << std::endl;
+    return moveCoords;
 }
 
 std::vector<std::string> Game::splitString(std::string inputString, std::string delimiter)

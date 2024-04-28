@@ -9,7 +9,6 @@
 #include <iostream>
 
 #define BLUE_BOLD "\033[1;94m"
-//#define BLUE_BOLD ""
 
 Player::Player(short sizeWarriors, short width, short height) : Player(sizeWarriors, std::string(BLUE_BOLD), false, width, height) {}
 Player::Player(short sizeWarriors, std::string color, bool isDefender, short width, short height)

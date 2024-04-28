@@ -9,6 +9,7 @@
 #define board_hpp
 
 #include <iostream>
+#include <vector>
 #include "player.hpp"
 #include "defender.hpp"
 #include "logger/logger.hpp"
@@ -34,7 +35,7 @@ class Board
         Board(short width, short height);
         ~Board();
     
-        void printBoard(short attackerCaptured, short defenderCaptured);
+        void printBoard(std::vector<short> moveCoords, short attackerCaptured, short defenderCaptured);
         Player* getPlayer();
     
         void matchPieces(Player* attacker, Defender* defender);

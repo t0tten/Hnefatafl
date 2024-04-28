@@ -2,10 +2,22 @@ TARGET=hnefatafl
 GCFLAGS=-g -std=c++20
 #SRC=$(shell ls *.cpp *.hpp)
 SRC=$(shell find . -iname "*.cpp" && find . -iname "*.hpp")
-GCH=$(shell ls -R *.gch)
+GCH=$(shell find . -iname "*.gch")
 
-build:
-	g++ $(GCFLAGS) $(SRC)
+all: build
 
-clean:
-	rm a.out $(GCH)
+build: obj 
+	g++ *.o -o $(TARGET)
+	make clean
+obj:
+	g++ -c $(GCFLAGS) $(SRC)
+clean: 
+	rm *.o $(GCH)
+purge:
+	rm $(TARGET)
+run:
+	./$(TARGET)
+install:
+	sudo cp $(TARGET) /usr/bin/$(TARGET)
+uninstall:
+	sudo rm /usr/bin/$(TARGET)

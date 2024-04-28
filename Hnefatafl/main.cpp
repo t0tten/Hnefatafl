@@ -19,7 +19,12 @@ int main(int argc, const char * argv[]) {
     
     
     char run = 'y';
-    std::cout << std::string(CLS) << "\n                                        -= " << std::string(RED_BOLD) << "R U L E S" << std::string(RESET_REGULAR) << " =-  \n\n";
+    std::cout << std::string(CLS) << "               __    __ _____ _____ ____    __ _______  _________ _______  _____ __\n";
+    std::cout << "             /  /__/  /   __/   __/     | /  /   __   /___   ___/   __   /   __/  /\n";
+    std::cout << "            /   __   /   __/   _//  /|  |/  /  /__/  /   /  /  /  /__/  /   _//  /__\n";
+    std::cout << "           /__/  /__/_____/___/ /__/ |_____/__/  /__/   /__/  /__/  /__/___/ /_____/\n\n";
+    
+    std::cout << "\n                                        -= " << std::string(RED_BOLD) << "R U L E S" << std::string(RESET_REGULAR) << " =-  \n\n";
     std::cout << "The objective for the " << std::string(GREEN_BOLD) << "DEFENDER" << std::string(RESET_REGULAR) << " is to get the king (" << std::string(RED_BOLD) << "@" << std::string(RESET_REGULAR) << ") to any of the corners of the board.\n";
     std::cout << "The objective for the " << std::string(BLUE_BOLD) << "ATTACKER" << std::string(RESET_REGULAR) << " is to capture the king by putting a warrior (" << std::string(RED_BOLD) << "!" << std::string(RESET_REGULAR) << ") on each side of the king.\n\n";
     std::cout << "Any of the warriors can be capture by putting two of the opponents warriors on each side of it.\n";

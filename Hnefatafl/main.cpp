@@ -10,7 +10,15 @@
 
 int main(int argc, const char * argv[]) {
     Logger::Initialize(Logger::LogLevel::WARNING);
-    Game* game = new Game();
-    delete game;
+    
+    char run = 'y';
+    while (run == 'y' || run == 'Y')
+    {
+        Game* game = new Game();
+        delete game;
+        std::cout << "Play again? (Y/n): ";
+        std::cin >> run;
+    }
+    
     return 0;
 }

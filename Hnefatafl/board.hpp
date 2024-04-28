@@ -27,6 +27,8 @@ class Board
         bool checkCaptureBelow(bool isDefender, short toX, short toY);
         bool checkCaptureRight(bool isDefender, short toX, short toY);
         bool checkCaptureLeft(bool isDefender, short toX, short toY);
+    
+        void printBoardHeader();
 
     public:
         Board(short width, short height);

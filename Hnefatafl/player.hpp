@@ -14,7 +14,7 @@
 class Player
 {
     public:
-        Player(short sizeWarriors);
+        Player(short sizeWarriors, short width, short height);
         ~Player();
 
         Piece** getWarriors();
@@ -25,10 +25,12 @@ class Player
         virtual std::string getName();
     
     protected:
-        Player(short sizeWarriors, std::string color, bool isDefender);
+        Player(short sizeWarriors, std::string color, bool isDefender, short width, short height);
         Piece** warriors;
         short sizeWarriors;
         short warriorsLeft;
+        short width;
+        short height;
         Logger* log = Logger::GetInstance();
 };
 

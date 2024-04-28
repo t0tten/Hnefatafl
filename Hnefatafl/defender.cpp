@@ -11,7 +11,7 @@
 #define GREEN_BOLD "\033[1;32m"
 //#define GREEN_BOLD ""
 
-Defender::Defender(short sizeWarriors) : Player(sizeWarriors, std::string(GREEN_BOLD), true)
+Defender::Defender(short sizeWarriors, short width, short height) : Player(sizeWarriors, std::string(GREEN_BOLD), true, width, height)
 {
     this->log->debug("Defender constructor");
     this->king = new Piece(Piece::PieceType::KING, std::string(GREEN_BOLD), true);
@@ -35,25 +35,29 @@ std::string Defender::getName()
 void Defender::placePieces()
 {
     this->log->debug("Place pieces Defender");
+    short halfWidth = this->width/2;
+    short halfHeight = this->height/2;
     
-    this->warriors[0]->setCoord(3,5);
+    this->warriors[0]->setCoord(halfWidth - 2, halfHeight);
+    this->warriors[1]->setCoord(halfWidth - 1 ,halfHeight);
+    this->warriors[2]->setCoord(halfWidth, halfHeight - 2);
+    this->warriors[3]->setCoord(halfWidth, halfHeight - 1);
+
+    this->king->setCoord(halfWidth, halfHeight);
+
+    this->warriors[4]->setCoord(halfWidth, halfHeight + 1);
+    this->warriors[5]->setCoord(halfWidth, halfHeight + 2);
+    this->warriors[6]->setCoord(halfWidth + 1, halfHeight);
+    this->warriors[7]->setCoord(halfWidth + 2, halfHeight);
     
-    this->warriors[1]->setCoord(4,4);
-    this->warriors[2]->setCoord(4,5);
-    this->warriors[3]->setCoord(4,6);
-    
-    this->warriors[4]->setCoord(5,3);
-    this->warriors[5]->setCoord(5,4);
-    this->warriors[6]->setCoord(5,6);
-    this->warriors[7]->setCoord(5,7);
-    
-    this->warriors[8]->setCoord(6,4);
-    this->warriors[9]->setCoord(6,5);
-    this->warriors[10]->setCoord(6,6);
-    
-    this->warriors[11]->setCoord(7,5);
-    
-    this->king->setCoord(5, 5);
+    //Extras
+    if (this->width > 10)
+    {
+        this->warriors[8]->setCoord(halfWidth - 1, halfHeight + 1);
+        this->warriors[9]->setCoord(halfWidth - 1, halfHeight - 1);
+        this->warriors[10]->setCoord(halfWidth + 1, halfHeight + 1);
+        this->warriors[11]->setCoord(halfWidth + 1, halfHeight - 1);
+    }
 }
 
 Piece* Defender::getKing()

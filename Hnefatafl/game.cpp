@@ -18,8 +18,11 @@
 #define CLS             "\x1B[2J\x1B[H"
 //#define CLS             ""
 
-Game::Game()
+Game::Game(short width, short height)
 {
+    this->width = width;
+    this->height = height;
+    
     this->logger = Logger::GetInstance();
     this->attackerCaptured = 0;
     this->defenderCaptured = 0;
@@ -27,13 +30,13 @@ Game::Game()
     this->playerTurn = 0;
     this->gameIsRunning = true;
     
-    this->attacker = new Player(6*4);
+    this->attacker = new Player(6*4, width, height);
     this->attacker->placePieces();
     
-    this->defender = new Defender(12);
+    this->defender = new Defender(12, width, height);
     this->defender->placePieces();
     
-    this->board = new Board(11, 11);
+    this->board = new Board(width, height);
     this->board->matchPieces(this->attacker, this->defender);
     
     this->gameLoop();
@@ -50,7 +53,13 @@ void Game::gameLoop()
     Player* playerTurn = this->attacker;
     while (gameIsRunning)
     {
-        std::cout << "\n\n" << std::string(CLS) << "      " << std::string(RED_BOLD) << "H N E F A T A F L" << std::string(RESET_REGULAR) << std::endl;
+        std::string title = "H N E F A T A F L";
+        std::string padding = " ";
+        short titleAdding = 0;
+        if (this->width > title.size()) titleAdding = (title.size() / 4);
+        for (int i = 0; i < ((this->width/2) + titleAdding); i++) padding += " ";
+        std::cout << std::string(CLS) << "\n" << padding << std::string(RED_BOLD) << title << std::string(RESET_REGULAR) << std::endl;
+        
         this->processInput(playerTurn, input);
         this->board->printBoard(this->attackerCaptured, this->defenderCaptured);
         if (gameIsRunning)
@@ -210,16 +219,12 @@ void Game::processInput(Player* playerTurn, std::string input)
 
 std::vector<std::string> Game::splitString(std::string inputString, std::string delimiter)
 {
-    this->logger->debug("INPUT_STRING: " + inputString);
-    this->logger->debug("DELIMITER: " + delimiter);
     std::vector<std::string> array;
     size_t pos = 0;
     while ((pos = inputString.find(delimiter)) != std::string::npos) {
         array.push_back(inputString.substr(0, pos));
-        this->logger->debug("ZERO: " + array.at(0));
         inputString.erase(0, pos + delimiter.length());
     }
     array.push_back(inputString);
-    this->logger->debug("ONE: " + array.at(1));
     return array;
 }

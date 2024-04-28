@@ -11,10 +11,13 @@
 #define BLUE_BOLD "\033[1;94m"
 //#define BLUE_BOLD ""
 
-Player::Player(short sizeWarriors) : Player(sizeWarriors, std::string(BLUE_BOLD), false) {}
-Player::Player(short sizeWarriors, std::string color, bool isDefender)
+Player::Player(short sizeWarriors, short width, short height) : Player(sizeWarriors, std::string(BLUE_BOLD), false, width, height) {}
+Player::Player(short sizeWarriors, std::string color, bool isDefender, short width, short height)
 {
     this->log->debug("Player constructor");
+    this->width = width;
+    this->height = height;
+    if (this->width <= 10) sizeWarriors = (isDefender) ? 8 : 16;
     this->sizeWarriors = this->warriorsLeft = sizeWarriors;
     this->warriors = new Piece*[sizeWarriors];
     for (int i = 0; i < this->sizeWarriors; i++) {
@@ -54,35 +57,44 @@ void Player::placePieces()
 {
     this->log->debug("Place pieces");
     
-    // top
-    this->warriors[0]->setCoord(0,3);
-    this->warriors[1]->setCoord(0,4);
-    this->warriors[2]->setCoord(0,5);
-    this->warriors[3]->setCoord(0,6);
-    this->warriors[4]->setCoord(0,7);
-    this->warriors[5]->setCoord(1,5);
-    
-    // right
-    this->warriors[6]->setCoord(3,10);
-    this->warriors[7]->setCoord(4,10);
-    this->warriors[8]->setCoord(5,10);
-    this->warriors[9]->setCoord(6,10);
-    this->warriors[10]->setCoord(7,10);
-    this->warriors[11]->setCoord(5,9);
-    
-    // bottom
-    this->warriors[12]->setCoord(10,3);
-    this->warriors[13]->setCoord(10,4);
-    this->warriors[14]->setCoord(10,5);
-    this->warriors[15]->setCoord(10,6);
-    this->warriors[16]->setCoord(10,7);
-    this->warriors[17]->setCoord(9,5);
+    short halfWidth = this->width/2;
+    short halfHeight = this->height/2;
     
     // left
-    this->warriors[18]->setCoord(3,0);
-    this->warriors[19]->setCoord(4,0);
-    this->warriors[20]->setCoord(5,0);
-    this->warriors[21]->setCoord(6,0);
-    this->warriors[22]->setCoord(7,0);
-    this->warriors[23]->setCoord(5,1);
+    this->warriors[0]->setCoord(0, halfHeight - 1);
+    this->warriors[1]->setCoord(0, halfHeight);
+    this->warriors[2]->setCoord(0, halfHeight + 1);
+    this->warriors[3]->setCoord(1, halfHeight);
+    
+    // bottom
+    this->warriors[4]->setCoord(halfWidth - 1, this->height - 1);
+    this->warriors[5]->setCoord(halfWidth, this->height - 1);
+    this->warriors[6]->setCoord(halfWidth + 1, this->height - 1);
+    this->warriors[7]->setCoord(halfWidth, this->height - 2);
+    
+    // right
+    this->warriors[8]->setCoord(this->width - 1, halfHeight - 1);
+    this->warriors[9]->setCoord(this->width - 1, halfHeight);
+    this->warriors[10]->setCoord(this->width - 1, halfHeight + 1);
+    this->warriors[11]->setCoord(this->width - 2, halfHeight);
+    
+    // top
+    this->warriors[12]->setCoord(halfWidth - 1, 0);
+    this->warriors[13]->setCoord(halfWidth, 0);
+    this->warriors[14]->setCoord(halfWidth + 1, 0);
+    this->warriors[15]->setCoord(halfWidth, 1);
+    
+    //Extras
+    if (this->width > 10)
+    {
+        this->warriors[16]->setCoord(0, halfHeight - 2);
+        this->warriors[17]->setCoord(0, halfHeight + 2);
+        this->warriors[18]->setCoord(halfWidth - 2, this->height - 1);
+        this->warriors[19]->setCoord(halfWidth + 2, this->height - 1);
+        this->warriors[20]->setCoord(this->width - 1, halfHeight - 2);
+        this->warriors[21]->setCoord(this->width - 1, halfHeight + 2);
+        this->warriors[22]->setCoord(halfWidth - 2, 0);
+        this->warriors[23]->setCoord( halfWidth + 2, 0);
+    }
+    
 }

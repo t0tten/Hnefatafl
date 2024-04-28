@@ -51,15 +51,36 @@ Board::~Board()
     delete this->board;
 }
 
+void Board::printBoardHeader()
+{
+    short numLoops = (short)this->width / 10;
+    for (int j = 0; j <= numLoops; j++)
+    {
+        std::cout << "   ";
+        for (int x = 0; x < this->width; x++)
+        {
+            if (numLoops > 0 && j == 0)
+            {
+                std::string numStr = " ";
+                if (x > 9) {
+                    short tmpX = (short) x / 10;
+                    numStr = std::to_string(tmpX);
+                }
+                std::cout << " " << numStr;
+            }
+            else
+            {
+                short tmpX = (x < 10) ? x : x - 10;
+                std::cout << " " << tmpX;
+            }
+        }
+        std::cout << std::endl;
+    }
+}
+
 void Board::printBoard(short attackerCaptured, short defenderCaptured)
 {
-    std::cout << "   ";
-    for (int x = 0; x < this->width; x++)
-    {
-        std::cout << " " << x;
-    }
-    std::cout << std::endl;
-
+    this->printBoardHeader();
     for (int y = 0; y < this->height; y++)
     {
         std::string padding = " ";

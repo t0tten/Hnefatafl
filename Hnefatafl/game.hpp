@@ -27,17 +27,19 @@ class Game
         bool gameIsRunning;
         short attackerCaptured;
         short defenderCaptured;
+        short width;
+        short height;
     
         void gameLoop();
         void printGame();
         std::string gatherInput(Player* playerTurn);
         void processInput(Player* playerTurn, std::string input);
     
-        std::vector<std::string> splitString(std::string inputString, std::string delimiter);
-    
     public:
-        Game();
+        Game(short width, short height);
         ~Game();
+    
+        static std::vector<std::string> splitString(std::string inputString, std::string delimiter);
 };
 
 #endif /* game_hpp */

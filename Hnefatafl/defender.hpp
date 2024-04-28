@@ -15,7 +15,7 @@
 class Defender : public Player
 {
     public:
-        Defender(short sizeWarriors);
+        Defender(short sizeWarriors, short width, short height);
         ~Defender();
         virtual void placePieces();
         Piece* getKing();

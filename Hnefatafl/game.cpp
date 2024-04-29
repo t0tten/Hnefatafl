@@ -5,20 +5,20 @@
 //  Created by Rasmus Schenström on 2024-04-27.
 //
 
-#include "game.hpp"
 #include <iostream>
 #include <regex>
 
-#define RED_BOLD        "\033[1;31m"
-#define RESET_REGULAR   "\033[0m"
-#define CLS             "\x1B[2J\x1B[H"
+#include "constants.hpp"
+#include "game.hpp"
 
 Game::Game(short width, short height)
 {
+    this->logger = Logger::GetInstance();
+    
+    this->title = "H N E F A T A F L";
     this->width = width;
     this->height = height;
     
-    this->logger = Logger::GetInstance();
     this->attackerCaptured = 0;
     this->defenderCaptured = 0;
     
@@ -32,7 +32,7 @@ Game::Game(short width, short height)
     this->defender->placePieces();
     
     this->board = new Board(width, height);
-    this->board->matchPieces(this->attacker, this->defender);
+    this->board->placePiecesOnBoard(this->attacker, this->defender);
     
     this->gameLoop();
 }
@@ -48,176 +48,147 @@ void Game::gameLoop()
     Player* playerTurn = this->attacker;
     while (gameIsRunning)
     {
-        std::string title = "H N E F A T A F L";
-        std::string padding = " ";
-        short titleAdding = 0;
-        if (this->width > title.size()) titleAdding = (title.size() / 4);
-        for (int i = 0; i < ((this->width/2) + titleAdding); i++) padding += " ";
-        std::cout << std::string(CLS) << "\n" << padding << std::string(RED_BOLD) << title << std::string(RESET_REGULAR) << std::endl;
-        
+        std::cout << this->generateTitleHeader();
         std::vector<short> moveCoords = this->processInput(playerTurn, input);
         this->board->printBoard(moveCoords, this->attackerCaptured, this->defenderCaptured);
         if (gameIsRunning)
         {
-            if ((this->playerTurn % 2) == 0)
-            {
-                playerTurn = this->attacker;
-            }
-            else
-            {
-                playerTurn = this->defender;
-            }
+            playerTurn = ((this->playerTurn % 2) == 0) ? this->attacker : this->defender;
             input = gatherInput(playerTurn);
         }
     }
 }
 
-void Game::printGame() {}
+std::string Game::generateTitleHeader()
+{
+    std::string padding = " ";
+    short titleAdding = 0;
+    if (this->width > this->title.size()) titleAdding = (this->title.size() / 4);
+    for (int i = 0; i < ((this->width/2) + titleAdding); i++) padding += " ";
+    return Constants::CLEAR_SCREEN + "\n" + padding + Constants::FG_RED_BOLD + title + Constants::RESET_FORMATTING + "\n";
+}
 
 std::string Game::gatherInput(Player* playerTurn)
 {
-    std::cout << "\nPlayer turn: " << playerTurn->getColor() << playerTurn->getName() << std::string(RESET_REGULAR) << "\nMove Piece (x,y -> x,y): ";
+    std::cout << "\nPlayer turn: " << playerTurn->getColor() << playerTurn->getName() << Constants::RESET_FORMATTING << "\nMove Piece (x,y -> x,y): ";
     std::string input;
     std::getline(std::cin, input);
     return input;
 }
 
+std::string Game::checkInputs(bool isDefender, short fromX, short fromY, short toX, short toY)
+{
+    if (!this->board->checkIntegrity(isDefender, fromX, fromY, toX, toY))   return "NOT A VIABLE MOVE";
+    if (!this->board->checkBoundaries(toX, toY))                            return "OUT OF BOUNDS OF MAP";
+    if (!this->board->checkIsFreeSquare(toX, toY))                          return "SQUARE ALREADY OCCUPIED";
+    if (!this->board->checkIsStraightPath(fromX, fromY, toX, toY))          return "CAN ONLY MOVE IN STRAIGHT LINES";
+    if (!this->board->checkFreePath(fromX, fromY, toX, toY))                return "NOT A FREE PATH";
+    if (this->board->checkIsKingsSquare(fromX, fromY, toX, toY))            return "WARRIOR NOT ALLOWED ON A KINGS SQUARE";
+    return "";
+}
+
+bool Game::checkWinner()
+{
+    if (this->board->checkKingsPosition(this->defender->getKing()->getX(), this->defender->getKing()->getY()) ||
+       ((this->attacker->getSize() - this->attackerCaptured) == 0) ||
+        this->board->checkCheckMate(this->defender->getKing()->getX(), this->defender->getKing()->getY()))
+    {
+        return true;
+    }
+    return false;
+}
+
+std::vector<short> Game::checkIfCapture(bool isDefender, short fromX, short fromY, short toX, short toY)
+{
+    std::vector<short> captured = {-1, -1};
+    short direction = this->board->checkIsCaptured(isDefender, fromX, fromY, toX, toY);
+    if (direction != -1)
+    {
+        short removeX = toX;
+        short removeY = toY;
+        switch (direction)
+        {
+            case 0: removeY -= 1;
+                break;
+            case 1: removeX += 1;
+                break;
+            case 2: removeY += 1;
+                break;
+            case 3: removeX -= 1;
+                break;
+            default:
+                break;
+        }
+        captured = {removeX, removeY};
+        this->board->removePiece(removeX, removeY);
+        if (isDefender) this->attackerCaptured++;
+        else            this->defenderCaptured++;
+    }
+    return captured;
+}
+
+
+std::string Game::removeWhitespaces(std::string input)
+{
+    std::string sanitized;
+    for (int i = 0; i < input.size(); i++)
+    {
+        if (input[i] != ' ')
+        {
+            sanitized += input[i];
+        }
+    }
+    return sanitized;
+}
+
 std::vector<short> Game::processInput(Player* playerTurn, std::string input)
 {
     std::cout << "\nInput: " << input << std::endl;
-    std::string message = "";
-    std::vector<short> moveCoords = {-1, -1, -1, -1};
-    if (std::regex_match(input, std::regex("[ ]*[0-9]+[ ]*,[ ]*[0-9]+[ ]*-[ ]*>[ ]*[0-9]+[ ]*,[ ]*[0-9]+[ ]*")))
+    
+    std::vector<short> moveCoords = {-1, -1, -1, -1, -1, -1};
+    if (std::regex_match(input, std::regex(this->inputRegex)))
     {
-        message = playerTurn->getColor() + playerTurn->getName() + std::string(RESET_REGULAR);
-        
-        // Remove whitespaces
-        std::string sanitized = "";
-        for (int i = 0; i < input.size(); i++)
-        {
-            if (input[i] != ' ')
-            {
-                sanitized += input[i];
-            }
-        }
-        this->logger->debug(sanitized);
-        
-        // Get coords
-        std::vector<std::string> coords = this->splitString(sanitized, "->");
-        
-        std::vector<std::string> moveFrom = this->splitString(coords.at(0), ",");
-        moveCoords[0] = std::stoi(moveFrom.at(0));
-        moveCoords[1] = std::stoi(moveFrom.at(1));
-        
-        std::vector<std::string> moveTo = this->splitString(coords.at(1), ",");
-        moveCoords[2] = std::stoi(moveTo.at(0));
-        moveCoords[3] = std::stoi(moveTo.at(1));
-        
+        std::string sanitized = removeWhitespaces(input);
+        std::vector<std::string> coords     = this->splitString(sanitized, "->");
+        std::vector<std::string> moveFrom   = this->splitString(coords.at(0), ",");
+        std::vector<std::string> moveTo     = this->splitString(coords.at(1), ",");
         
         Defender* defender = dynamic_cast<Defender*>(playerTurn);
         bool isDefender = (defender != nullptr) ? true : false;
         
-        // Check movebility
-        if (this->board->checkIntegrity(isDefender, std::stoi(moveFrom.at(0)), std::stoi(moveFrom.at(1)), std::stoi(moveTo.at(0)), std::stoi(moveTo.at(1))))
+        std::string message = this->checkInputs(isDefender, std::stoi(moveFrom.at(0)), std::stoi(moveFrom.at(1)), std::stoi(moveTo.at(0)), std::stoi(moveTo.at(1)));
+        if (message == "")
         {
-            if (this->board->checkBoundaries(std::stoi(moveTo.at(0)), std::stoi(moveTo.at(1))))
+            this->board->movePiece(std::stoi(moveFrom.at(0)), std::stoi(moveFrom.at(1)), std::stoi(moveTo.at(0)), std::stoi(moveTo.at(1)));
+            this->playerTurn++;
+            
+            moveCoords[0] = std::stoi(moveFrom.at(0));
+            moveCoords[1] = std::stoi(moveFrom.at(1));
+            moveCoords[2] = std::stoi(moveTo.at(0));
+            moveCoords[3] = std::stoi(moveTo.at(1));
+            Player* opponent = (isDefender) ? this->attacker : this->defender;
+            
+            message = playerTurn->getColor() + playerTurn->getName() + Constants::RESET_FORMATTING;
+            if (this->checkWinner())
             {
-                if (this->board->checkIsFreeSquare(std::stoi(moveTo.at(0)), std::stoi(moveTo.at(1))))
-                {
-                    if (this->board->checkIsStraightPath(std::stoi(moveFrom.at(0)), std::stoi(moveFrom.at(1)), std::stoi(moveTo.at(0)), std::stoi(moveTo.at((1)))))
-                    {
-                        if (this->board->checkFreePath(std::stoi(moveFrom.at(0)), std::stoi(moveFrom.at(1)), std::stoi(moveTo.at(0)), std::stoi(moveTo.at(1))))
-                        {
-                            if (!this->board->checkIsKingsSquare(std::stoi(moveFrom.at(0)), std::stoi(moveFrom.at(1)), std::stoi(moveTo.at(0)), std::stoi(moveTo.at(1))))
-                            {
-                                this->board->movePiece(std::stoi(moveFrom.at(0)), std::stoi(moveFrom.at(1)), std::stoi(moveTo.at(0)), std::stoi(moveTo.at(1)));
-                                this->playerTurn++;
-                                
-                                // Check capture
-                                short direction = this->board->checkIsCaptured(isDefender, std::stoi(moveFrom.at(0)), std::stoi(moveFrom.at(1)), std::stoi(moveTo.at(0)), std::stoi(moveTo.at(1)));
-                                
-                                Player* opponent = this->defender;
-                                if (isDefender)
-                                {
-                                    opponent = this->attacker;
-                                }
-                                
-                                
-                                if (direction != -1)
-                                {
-                                    short removeX = std::stoi(moveTo.at(0));
-                                    short removeY = std::stoi(moveTo.at(1));
-                                    switch (direction)
-                                    {
-                                        case 0: removeY -= 1;
-                                            break;
-                                        case 1: removeX += 1;
-                                            break;
-                                        case 2: removeY += 1;
-                                            break;
-                                        case 3: removeX -= 1;
-                                            break;
-                                        default:
-                                            break;
-                                    }
-                                    
-                                    this->board->removePiece(removeX, removeY);
-                                    if (isDefender)
-                                    {
-                                        this->attackerCaptured++;
-                                    } else
-                                    {
-                                        this->defenderCaptured++;
-                                    }
-                                    message += " CAPTURED " + opponent->getColor() + opponent->getName() + "S" +  + RESET_REGULAR + " PIECE AT COORD (" + std::to_string(removeX) + "," + std::to_string(removeY) + ")";
-                                } else {
-                                    message += " MOVED (" + std::to_string(std::stoi(moveFrom.at(0))) + "," + std::to_string(std::stoi(moveFrom.at(1)))+ ") TO (" + std::to_string(std::stoi(moveTo.at(0))) + "," + std::to_string(std::stoi(moveTo.at(1))) + ")";
-                                }
-                                
-                                // Check winners
-                                if (this->board->checkKingsPosition(this->defender->getKing()->getX(), this->defender->getKing()->getY()) || this->attacker->getSize() == 0)
-                                {
-                                    this->gameIsRunning = false;
-                                    message = "DEFENDER HAS WON THE GAME!";
-                                }
-                                
-                                if (this->board->checkCheckMate(this->defender->getKing()->getX(), this->defender->getKing()->getY()) || this->defender->getSize() == 0)
-                                {
-                                    this->gameIsRunning = false;
-                                    message = "ATTACKER HAS WON THE GAME!";
-                                }
-                            }
-                            else
-                            {
-                                message = "WARRIOR NOT ALLOWED ON A KINGS SQUARE";
-                            }
-                        }
-                        else
-                        {
-                            message = "NOT A FREE PATH";
-                        }
-                    }
-                    else
-                    {
-                        message = "CAN ONLY MOVE IN STRAIGHT LINES";
-                    }
-                }
-                else
-                {
-                    message = "SQUARE ALREADY OCCUPIED";
-                }
+                message += " HAS WON THE GAME!";
+                this->gameIsRunning = false;
             }
             else
             {
-                message = "OUT OF BOUNDS OF MAP";
+                message += " MOVED (" + std::to_string(std::stoi(moveFrom.at(0))) + "," + std::to_string(std::stoi(moveFrom.at(1)))+ ") TO (" + std::to_string(std::stoi(moveTo.at(0))) + "," + std::to_string(std::stoi(moveTo.at(1))) + ")";
+                
+                std::vector<short> captured = checkIfCapture(isDefender, std::stoi(moveFrom.at(0)), std::stoi(moveFrom.at(1)), std::stoi(moveTo.at(0)), std::stoi(moveTo.at(1)));
+                if (captured.at(0) != -1)
+                {
+                    moveCoords[4] = captured[0];
+                    moveCoords[5] = captured[1];
+                    message += " AND CAPTURED " + opponent->getColor() + opponent->getName() + "S" + Constants::RESET_FORMATTING + " PIECE AT (" + std::to_string(captured[0]) + "," + std::to_string(captured[1]) + ")";
+                }
             }
         }
-        else
-        {
-            message = "NOT A VIABLE MOVE";
-        }
+        std::cout << "Message: " << message << std::endl << std::endl;
     }
-    std::cout << "Message: " << message << std::endl << std::endl;
     return moveCoords;
 }
 

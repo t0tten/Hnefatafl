@@ -5,12 +5,12 @@
 //  Created by Rasmus Schenström on 2024-04-27.
 //
 
-#include "player.hpp"
 #include <iostream>
 
-#define BLUE_BOLD "\033[1;94m"
+#include "constants.hpp"
+#include "player.hpp"
 
-Player::Player(short sizeWarriors, short width, short height) : Player(sizeWarriors, std::string(BLUE_BOLD), false, width, height) {}
+Player::Player(short sizeWarriors, short width, short height) : Player(sizeWarriors, Constants::ATTACKER_COLOR, false, width, height) {}
 Player::Player(short sizeWarriors, std::string color, bool isDefender, short width, short height)
 {
     this->log->debug("Player constructor");
@@ -44,7 +44,7 @@ short Player::getSize()
 
 std::string Player::getColor()
 {
-    return std::string(BLUE_BOLD);
+    return Constants::ATTACKER_COLOR;
 }
 
 std::string Player::getName()

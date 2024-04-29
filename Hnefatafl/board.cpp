@@ -5,22 +5,17 @@
 //  Created by Rasmus Schenström on 2024-04-26.
 //
 
-#include "board.hpp"
 #include <iostream>
 
-#define GREEN_BOLD      "\033[1;32m"
-#define BLUE_BOLD       "\033[1;94m"
-#define CYAN_REGULAR    "\033[0;96m"
-#define BG_WHITE        "\033[0;100m"
-#define RESET_REGULAR   "\033[0m"
+#include "board.hpp"
+#include "constants.hpp"
 
 Board::Board(short width, short height)
 {
     this->log->info("Board constructor");
     this->width = width;
     this->height = height;
-
-    this->log->debug("Initializing board");
+    
     this->board = new Piece**[this->width];
     for (int x = 0; x < this->width; x++)
     {
@@ -48,12 +43,13 @@ Board::~Board()
     delete this->board;
 }
 
-void Board::printBoardHeader()
+std::string Board::getBoardHeader()
 {
+    std::string header = "";
     short numLoops = (short)this->width / 10;
     for (int j = 0; j <= numLoops; j++)
     {
-        std::cout << "   ";
+        header += "   ";
         for (int x = 0; x < this->width; x++)
         {
             if (numLoops > 0 && j == 0)
@@ -63,105 +59,114 @@ void Board::printBoardHeader()
                     short tmpX = (short) x / 10;
                     numStr = std::to_string(tmpX);
                 }
-                std::cout << " " << numStr;
+                header += " " + numStr;
             }
             else
             {
                 short tmpX = (x < 10) ? x : x - 10;
-                std::cout << " " << tmpX;
+                header += " " + std::to_string(tmpX);
             }
         }
-        std::cout << std::endl;
+        header += "\n";
     }
+    return header;
+}
+
+std::string Board::getPaddingLeft(short y)
+{
+    std::string padding = " ";
+    if (y < 10) {
+        padding += " ";
+    }
+    padding += std::to_string(y) + "|";
+    return padding;
+}
+
+bool Board::shouldApplyBackground(short moveDiff, short num1, short comp1, short num2, short comp2, short comp3)
+{
+    bool shouldSetBackground = false;
+    if (moveDiff != 0)
+    {
+        if ((num1 == comp1 && num2 >= comp2 && num2 <= comp3) ||
+            (num1 == comp1 && num2 >= comp3 && num2 <= comp2))
+        {
+            shouldSetBackground = true;
+        }
+    }
+    return shouldSetBackground;
+}
+
+std::string Board::applyBackground(std::vector<short> moveCoords, short x, short y)
+{
+    std::string background = "";
+    if (moveCoords.at(0) != -1)
+    {
+        short xMove = moveCoords.at(0) - moveCoords.at(2);
+        short yMove = moveCoords.at(1) - moveCoords.at(3);
+        if (x == moveCoords.at(0) && y == moveCoords.at(1)) return Constants::BG_GRAY;
+        if (x == moveCoords.at(4) && y == moveCoords.at(5)) return Constants::BG_RED;
+        else if (this->shouldApplyBackground(xMove, y, moveCoords.at(1), x, moveCoords.at(0), moveCoords.at(2)) ||
+            this->shouldApplyBackground(yMove, x, moveCoords.at(0), y, moveCoords.at(1), moveCoords.at(3)))
+        {
+            return Constants::BG_GRAY;
+        }
+    }
+    return "";
+}
+
+std::string Board::getBoardRow(short y, std::vector<short> moveCoords)
+{
+    std::string row = "";
+    for (int x = 0; x < this->width; x++)
+    {
+        std::string background = this->applyBackground(moveCoords, x, y);
+        Piece* piece = this->board[x][y];
+        if (piece != nullptr)
+        {
+            row += this->board[x][y]->getColor() + this->board[x][y]->getSign() + Constants::RESET_FORMATTING;;
+        }
+        else
+        {
+            if (this->isKingsSquare(x, y))  row += Constants::FG_CYAN_REGULAR + "X";
+            else                            row += background + "_";
+        }
+        
+        short xMove = moveCoords.at(0) - moveCoords.at(2);
+        if (xMove == 0) row += Constants::RESET_FORMATTING;
+        if (x == moveCoords[4] && y == moveCoords[5]) row += Constants::RESET_FORMATTING;
+        row += "|";
+        if (xMove != 0) row += Constants::RESET_FORMATTING;
+    }
+    return row;
+}
+
+std::string Board::getPlayerLosses(std::string title, short titleRow, short y, short captured, std::string color)
+{
+    if (y == titleRow) return " " + title;
+    
+    std::string data = "";
+    if (y == titleRow + 1)
+    {
+        for (int i = 0; i < captured; i++)
+        {
+            data += "!";
+        }
+        return " [" + color + data + Constants::RESET_FORMATTING + "]";
+    }
+    
+    return "";
 }
 
 void Board::printBoard(std::vector<short> moveCoords, short attackerCaptured, short defenderCaptured)
 {
-    this->printBoardHeader();
+    std::cout << this->getBoardHeader();
     for (int y = 0; y < this->height; y++)
     {
-        std::string padding = " ";
-        if (y < 10) {
-            padding += " ";
-        }
-        padding += std::to_string(y) + "|";
-        std::cout << padding;
-        
-        for (int x = 0; x < this->width; x++)
-        {
-            // Background tracing
-            std::string bgMove = "";
-            if (moveCoords.at(0) != -1)
-            {
-                short xMove = moveCoords.at(0) - moveCoords.at(2);
-                short yMove = moveCoords.at(1) - moveCoords.at(3);
-                bool setBG = false;
-                if (xMove != 0)
-                {
-                    if ((y == moveCoords.at(1) && x > moveCoords.at(0) && x < moveCoords.at(2)) ||
-                        (y == moveCoords.at(1) && x > moveCoords.at(2) && x < moveCoords.at(0)))
-                    {
-                        setBG = true;
-                    }
-                }
-                
-                if (yMove != 0)
-                {
-                    if ((x == moveCoords.at(0) && y > moveCoords.at(1) && y < moveCoords.at(3)) ||
-                        (x == moveCoords.at(0) && y > moveCoords.at(3) && y < moveCoords.at(1)))
-                    {
-                        setBG = true;
-                    }
-                }
-                
-                if ((x == moveCoords.at(0) && y == moveCoords.at(1)) ||
-                    (x == moveCoords.at(2) && y == moveCoords.at(3)) || setBG)
-                {
-                    bgMove = std::string(BG_WHITE);
-                }
-            }
-            Piece* piece = this->board[x][y];
-            if (piece != nullptr)
-            {
-                std::cout << bgMove << this->board[x][y]->getColor() << this->board[x][y]->getSign() << std::string(RESET_REGULAR);
-            } else {
-                if (this->isKingsSquare(x, y)) {
-                    std::cout << std::string(CYAN_REGULAR) + "X" + std::string(RESET_REGULAR);
-                } else {
-                    std::cout << bgMove << "_" << std::string(RESET_REGULAR);
-                }
-            }
-            std::cout << "|";
-        }
-        if (y == 0)
-        {
-            std::cout << " ATTACKER";
-        }
-        if (y == 1)
-        {
-            std::cout << " [" << std::string(BLUE_BOLD);
-            for (int i = 0; i < attackerCaptured; i++)
-            {
-                std::cout << "!";
-            }
-            std::cout << std::string(RESET_REGULAR) << "]";
-        }
-        if (y == 3)
-        {
-            std::cout << " DEFENDER";
-        }
-        if (y == 4)
-        {
-            std::cout << " [" << std::string(GREEN_BOLD);
-            for (int i = 0; i < defenderCaptured; i++)
-            {
-                std::cout << "!";
-            }
-            std::cout << std::string(RESET_REGULAR) << "]";
-        }
+        std::cout << this->getPaddingLeft(y);
+        std::cout << this->getBoardRow(y, moveCoords);
+        std::cout << this->getPlayerLosses("ATTACKER", 0, y, attackerCaptured, Constants::ATTACKER_COLOR);
+        std::cout << this->getPlayerLosses("DEFENDER", 3, y, defenderCaptured, Constants::DEFENDER_COLOR);
         std::cout << std::endl;
-        
-        
     }
 }
 
@@ -180,46 +185,37 @@ bool Board::isKingsSquare(short x, short y)
     return false;
 }
 
-void Board::matchPieces(Player* attacker, Defender* defender)
+void Board::placePiecesOnBoard(Piece* piece)
+{
+    short x = piece->getX();
+    short y = piece->getY();
+    this->board[x][y] = piece;
+}
+
+void Board::placePlayerPiecesOnBoard(Player* player)
+{
+    Piece** playerWarriors = player->getWarriors();
+    for (int i = 0; i < player->getSize(); i++)
+    {
+        this->placePiecesOnBoard(playerWarriors[i]);
+    }
+}
+
+void Board::placePiecesOnBoard(Player* attacker, Defender* defender)
 {
     this->log->debug("Match pieces");
-    
-    // Attacker pieces
-    Piece** attackerWarriors = attacker->getWarriors();
-    for (int i = 0; i < attacker->getSize(); i++)
-    {
-        short x = attackerWarriors[i]->getX();
-        short y = attackerWarriors[i]->getY();
-
-        this->log->debug("I: " + std::to_string(i) + "X: " + std::to_string(x) + "Y: " + std::to_string(y));
-        this->board[x][y] = attackerWarriors[i];
-    }
-    
-    // Defender pieces
-    Piece** defenderWarriors = defender->getWarriors();
-    for (int i = 0; i < defender->getSize(); i++)
-    {
-        short x = defenderWarriors[i]->getX();
-        short y = defenderWarriors[i]->getY();
-
-        this->log->debug("I: " + std::to_string(i) + "X: " + std::to_string(x) + "Y: " + std::to_string(y));
-        this->board[x][y] = defenderWarriors[i];
-    }
-    Piece* king = defender->getKing();
-    short kingX = king->getX();
-    short kingY = king->getY();
-    this->board[kingX][kingY] = king;
+    this->placePlayerPiecesOnBoard(attacker);
+    this->placePlayerPiecesOnBoard(defender);
+    this->placePiecesOnBoard(defender->getKing());
 }
 
 bool Board::checkIntegrity(bool isDefender, short fromX, short fromY, short toX, short toY)
 {
-    // Not a piece at all
     if (this->board[fromX][fromY] == nullptr)
     {
         return false;
     }
     
-    // Not your piece
     if (this->board[fromX][fromY]->isDefender() != isDefender)
     {
         return false;

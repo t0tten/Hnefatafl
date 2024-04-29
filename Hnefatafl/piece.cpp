@@ -5,9 +5,11 @@
 //  Created by Rasmus Schenström on 2024-04-27.
 //
 
-#include "piece.hpp"
+
 #include <iostream>
 #include <string>
+
+#include "piece.hpp"
 
 Piece::Piece(PieceType pieceType, std::string color, bool isDefender)
 {

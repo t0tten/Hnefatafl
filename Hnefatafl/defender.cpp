@@ -5,15 +5,15 @@
 //  Created by Rasmus Schenström on 2024-04-27.
 //
 
-#include "defender.hpp"
 #include <iostream>
 
-#define GREEN_BOLD "\033[1;32m"
+#include "constants.hpp"
+#include "defender.hpp"
 
-Defender::Defender(short sizeWarriors, short width, short height) : Player(sizeWarriors, std::string(GREEN_BOLD), true, width, height)
+Defender::Defender(short sizeWarriors, short width, short height) : Player(sizeWarriors, Constants::DEFENDER_COLOR, true, width, height)
 {
     this->log->debug("Defender constructor");
-    this->king = new Piece(Piece::PieceType::KING, std::string(GREEN_BOLD), true);
+    this->king = new Piece(Piece::PieceType::KING, Constants::DEFENDER_COLOR, true);
 }
 
 Defender::~Defender()
@@ -23,7 +23,7 @@ Defender::~Defender()
 
 std::string Defender::getColor()
 {
-    return std::string(GREEN_BOLD);
+    return Constants::DEFENDER_COLOR;
 }
 
 std::string Defender::getName()

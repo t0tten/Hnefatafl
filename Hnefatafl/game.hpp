@@ -29,11 +29,19 @@ class Game
         short defenderCaptured;
         short width;
         short height;
+        std::string title;
+        const std::string inputRegex = "[ ]*[0-9]+[ ]*,[ ]*[0-9]+[ ]*-[ ]*>[ ]*[0-9]+[ ]*,[ ]*[0-9]+[ ]*";
     
         void gameLoop();
-        void printGame();
+    
+        std::string removeWhitespaces(std::string input);
         std::string gatherInput(Player* playerTurn);
         std::vector<short> processInput(Player* playerTurn, std::string input);
+        std::string generateTitleHeader();
+    
+        std::string checkInputs(bool isDefender, short fromX, short fromY, short toX, short toY);
+        bool checkWinner();
+        std::vector<short> checkIfCapture(bool isDefender, short fromX, short fromY, short toX, short toY);
     
     public:
         Game(short width, short height);

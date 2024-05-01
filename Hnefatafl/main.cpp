@@ -36,8 +36,8 @@ int main(int argc, const char * argv[]) {
     {
         Game* game = new Game(configurations, networking);
         delete game;
-        configurations->switchStartPlayer();
-        if (networking == nullptr || (networking != nullptr && networking->isConnected()))
+
+        if (!configurations->getIsNetworkEnabled())
         {
             std::cout << "Play again? (Y/n): ";
             std::cin >> run;
@@ -91,7 +91,7 @@ Networking* setupNetwork(Configurations* configurations)
         getline(std::cin, input);
         if (std::regex_match(input, std::regex("n|N")))
         {
-            configurations->setMe(configurations->getPlayerTurn());
+            configurations->setMe((configurations->getPlayerTurn() + 1) % 2);
             std::cout << "You will start as " << Constants::DEFENDER_COLOR << "DEFENDER" << Constants::RESET_FORMATTING << ".\n\n";
         }
         networking = new Networking(true);
@@ -100,7 +100,7 @@ Networking* setupNetwork(Configurations* configurations)
         
         networking->sendMsg(size);
         networking->recvMsg();
-        networking->sendMsg(std::to_string(configurations->getPlayerTurn()));
+        networking->sendMsg(std::to_string(configurations->getMe()));
         return networking;
     }
     else if (std::regex_match(input, std::regex("n|N")))
@@ -117,7 +117,6 @@ Networking* setupNetwork(Configurations* configurations)
                 ArgumentParser::setSize(configurations, size);
                 networking->sendMsg("ack");
                 std::string playerTurn = networking->recvMsg();
-                configurations->setPlayerTurn((short) std::stoi(playerTurn));
                 configurations->setMe((short) (std::stoi(playerTurn) + 1) % 2);
                 return networking;
             }

@@ -41,7 +41,8 @@ int main(int argc, const char * argv[]) {
         {
             std::cout << "Play again? (Y/n): ";
             std::cin >> run;
-        } 
+            std::cin.ignore();
+        }
         else
         {
             run = 'n';
@@ -71,6 +72,7 @@ char printRules(Configurations* configurations)
     std::cout << "Current board size: " << std::to_string(configurations->getWidth()) << "x" << std::to_string(configurations->getHeight()) << "\n";
     std::cout << "Ready to play? (Y/n): ";
     std::cin >> run;
+    std::cin.ignore();
     return run;
 }
 

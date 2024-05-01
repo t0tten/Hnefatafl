@@ -8,22 +8,27 @@
 #include <iostream>
 #include <regex>
 
+#include "configurations.hpp"
 #include "constants.hpp"
 #include "game.hpp"
+#include "network/networking.hpp"
 
-Game::Game(short width, short height)
+Game::Game(Configurations* configurations, Networking* networking)
 {
     this->logger = Logger::GetInstance();
     
     this->title = "H N E F A T A F L";
-    this->width = width;
-    this->height = height;
+    this->configurations = configurations;
+    this->networking = networking;
+    this->width = configurations->getWidth();
+    this->height = configurations->getHeight();
     
     this->attackerCaptured = 0;
     this->defenderCaptured = 0;
     
-    this->playerTurn = 0;
+    this->playerTurn = configurations->getPlayerTurn();
     this->gameIsRunning = true;
+    this->isNetworkEnabled = configurations->getIsNetworkEnabled();
     
     this->attacker = new Player(6*4, width, height);
     this->attacker->placePieces();
@@ -45,7 +50,7 @@ Game::~Game()
 void Game::gameLoop()
 {
     std::string input = "";
-    Player* playerTurn = this->attacker;
+    Player* playerTurn = (this->getPlayerTurn() == 0) ? this->attacker : this->defender;
     while (gameIsRunning)
     {
         std::cout << this->generateTitleHeader();
@@ -53,7 +58,7 @@ void Game::gameLoop()
         this->board->printBoard(moveCoords, this->attackerCaptured, this->defenderCaptured);
         if (gameIsRunning)
         {
-            playerTurn = ((this->playerTurn % 2) == 0) ? this->attacker : this->defender;
+            playerTurn = (this->getPlayerTurn() == 0) ? this->attacker : this->defender;
             input = gatherInput(playerTurn);
         }
     }
@@ -68,11 +73,36 @@ std::string Game::generateTitleHeader()
     return Constants::CLEAR_SCREEN + "\n" + padding + Constants::FG_RED_BOLD + title + Constants::RESET_FORMATTING + "\n";
 }
 
+short Game::getPlayerTurn()
+{
+    return this->playerTurn % 2;
+}
+
 std::string Game::gatherInput(Player* playerTurn)
 {
-    std::cout << "\nPlayer turn: " << playerTurn->getColor() << playerTurn->getName() << Constants::RESET_FORMATTING << "\nMove Piece (x,y -> x,y): ";
+    std::cout << "\nPlayer turn: " << playerTurn->getColor() << playerTurn->getName();
+    if (this->isNetworkEnabled && this->getPlayerTurn() != this->configurations->getMe())
+    {
+        std::cout << " (OPPONENT)";
+    } else
+    {
+        std::cout << " (YOU)";
+    }
+    
+    std::cout << Constants::RESET_FORMATTING << "\n";
     std::string input;
-    std::getline(std::cin, input);
+    //std::cout << "playerTurn: " << this->getPlayerTurn() << ", me: " << this->configurations->getMe() << std::endl;
+    if (this->isNetworkEnabled && this->getPlayerTurn() != this->configurations->getMe())
+    {
+        std::cout << "Waiting for opponent to finish the move...\n";
+        input = networking->recvMsg();
+        //std::cout << input << " - Got anything?\n";
+    }
+    else
+    {
+        std::cout << "Move Piece (x,y -> x,y): ";
+        std::getline(std::cin, input);
+    }
     return input;
 }
 
@@ -159,6 +189,13 @@ std::vector<short> Game::processInput(Player* playerTurn, std::string input)
         std::string message = this->checkInputs(isDefender, std::stoi(moveFrom.at(0)), std::stoi(moveFrom.at(1)), std::stoi(moveTo.at(0)), std::stoi(moveTo.at(1)));
         if (message == "")
         {
+            //std::cout << "playerTurn: " << this->getPlayerTurn() << ", me: " << this->configurations->getMe() << std::endl;
+            if (this->isNetworkEnabled && this->getPlayerTurn() == this->configurations->getMe())
+            {
+                //std::cout << "Sending!" << std::endl;
+                this->networking->sendMsg(input);
+            }
+            
             this->board->movePiece(std::stoi(moveFrom.at(0)), std::stoi(moveFrom.at(1)), std::stoi(moveTo.at(0)), std::stoi(moveTo.at(1)));
             this->playerTurn++;
             

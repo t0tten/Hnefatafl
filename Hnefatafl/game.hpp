@@ -9,9 +9,13 @@
 #define game_hpp
 
 #include "board.hpp"
-#include "player.hpp"
+#include "configurations.hpp"
 #include "defender.hpp"
 #include "logger/logger.hpp"
+#include "network/networking.hpp"
+#include "player.hpp"
+
+
 #include <string>
 #include <vector>
 
@@ -21,10 +25,13 @@ class Game
         Logger* logger;
         Player* attacker;
         Defender* defender;
+        Configurations* configurations;
+        Networking* networking;
     
         Board* board;
         short playerTurn;
         bool gameIsRunning;
+        bool isNetworkEnabled;
         short attackerCaptured;
         short defenderCaptured;
         short width;
@@ -38,13 +45,14 @@ class Game
         std::string gatherInput(Player* playerTurn);
         std::vector<short> processInput(Player* playerTurn, std::string input);
         std::string generateTitleHeader();
+        short getPlayerTurn();
     
         std::string checkInputs(bool isDefender, short fromX, short fromY, short toX, short toY);
         bool checkWinner();
         std::vector<short> checkIfCapture(bool isDefender, short fromX, short fromY, short toX, short toY);
     
     public:
-        Game(short width, short height);
+        Game(Configurations* configurations, Networking* networking);
         ~Game();
     
         static std::vector<std::string> splitString(std::string inputString, std::string delimiter);

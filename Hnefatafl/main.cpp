@@ -9,34 +9,63 @@
 #include <iostream>
 #include <regex>
 
+#include "argumentParser.hpp"
+#include "configurations.hpp"
 #include "constants.hpp"
 #include "game.hpp"
+#include "network/networking.hpp"
 
 int main(int argc, const char * argv[]) {
     Logger::Initialize(Logger::LogLevel::WARNING);
+    const float VERSION = 1.1;
     
-    short width = 11;
-    short height = 11;
+    //HERE
+    Configurations* configurations = ArgumentParser::parseArguments(VERSION, argc, argv);
+    if (configurations == nullptr) return 0;
     
-    if (argc > 1)
+    Networking* networking = nullptr;
+    if (configurations->getIsNetworkEnabled())
     {
-        if (std::regex_match(argv[1], std::regex("--help|-h")))
+        std::string input = "";
+        std::cout << "\nNETWORK MODE\n";
+        std::cout << "Would you like to host the server? [Y/n]:  ";
+        getline(std::cin, input);
+        
+        if (std::regex_match(input, std::regex("y|Y")))
         {
-            std::cout << "\nHnefatafl\nCreator: Rasmus Schenström\n\nOptions:\n\t[UN-EVEN NUM]x[UN-EVEN NUM] \t- Change board size (Eg: 11x11)\n" << std::endl;
-            return 0;
+            networking = new Networking(true);
+            networking->startSocket();
+            std::string size = std::to_string(configurations->getWidth()) + "x" + std::to_string(configurations->getHeight());
+            networking->sendMsg(size);
+            networking->recvMsg();
+            networking->sendMsg(std::to_string(configurations->getPlayerTurn()));
         }
-        else if (std::regex_match(argv[1], std::regex("[0-9]+x[0-9]+")))
+        else if (std::regex_match(input, std::regex("n|N")))
         {
-            std::cout << "CHANGE SIZE!" << std::endl;
-            std::vector<std::string> dimensions = Game::splitString(argv[1], "x");
-            
-            width = std::stoi(dimensions.at(0));
-            if (width % 2 == 0) width--;
-            if (width < 9) width = 9;
-            
-            height = std::stoi(dimensions.at(1));
-            if (height % 2 == 0) height--;
-            if (height < 9) height = 9;
+            std::cout << "Enter the IP-address of the host? [IPv4: X.X.X.X]:  ";
+            getline(std::cin, input);
+            if (std::regex_match(input, std::regex("[0-9]+\\.[0-9]+\\.[0-9]+\\.[0-9]+")))
+            {
+                networking = new Networking(false);
+                if (!networking->connectTo(input)) return 0;
+                
+                std::string size = networking->recvMsg();
+                ArgumentParser::setSize(configurations, size);
+                networking->sendMsg("ack");
+                std::string playerTurn = networking->recvMsg();
+                configurations->setPlayerTurn((short) std::stoi(playerTurn));
+                configurations->setMe((short) std::stoi(playerTurn) + 1);
+            }
+            else
+            {
+                std::cout << "Invalid option. Exiting...\n";
+                return 0;
+            }
+        }
+        else
+        {
+            std::cout << "Invalid option. Exiting...\n";
+            return 0;
         }
     }
     
@@ -52,17 +81,21 @@ int main(int argc, const char * argv[]) {
     std::cout << "A warrior can be captured by putting two of the opponents warriors on opposite side of it.\n";
     std::cout << "Warriors can only move in straight lines and can not be placed on a kings square (" << Constants::FG_RED_BOLD << "X" << Constants::RESET_FORMATTING << ").\n\n";
     std::cout << "The game is finished either by completing any of the objectives above or if all the opponents game pieces has been captured.\n\n";
-    std::cout << "Current board size: " << std::to_string(width) << "x" << std::to_string(height) << "\n";
+    std::cout << "Current board size: " << std::to_string(configurations->getWidth()) << "x" << std::to_string(configurations->getHeight()) << "\n";
     std::cout << "Ready to play? (Y/n): ";
     std::cin >> run;
     
     while (run == 'y' || run == 'Y')
     {
-        Game* game = new Game(width, height);
+        Game* game = new Game(configurations, networking);
         delete game;
+        configurations->switchStartPlayer();
         std::cout << "Play again? (Y/n): ";
         std::cin >> run;
     }
+    
+    if (networking != nullptr) delete networking;
+    delete configurations;
     
     return 0;
 }

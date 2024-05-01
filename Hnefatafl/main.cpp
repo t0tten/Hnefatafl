@@ -20,7 +20,7 @@ char printRules(Configurations* configurations);
 
 int main(int argc, const char * argv[]) {
     Logger::Initialize(Logger::LogLevel::WARNING);
-    const float VERSION = 1.1;
+    const float VERSION = 2.0;
     
     Configurations* configurations = ArgumentParser::parseArguments(VERSION, argc, argv);
     if (configurations == nullptr) return 0;

@@ -9,6 +9,7 @@
 #include "game.hpp"
 
 #include <iostream>
+#include <iomanip>
 #include <regex>
 
 Configurations* ArgumentParser::parseArguments(const float VERSION, int argc, const char * argv[])
@@ -20,7 +21,8 @@ Configurations* ArgumentParser::parseArguments(const float VERSION, int argc, co
         {
             if (std::regex_match(argv[i], std::regex("--help|-h")))
             {
-                std::cout << "\nHnefatafl\nCreator: Rasmus Schenström\nVersion: v" << VERSION << "\n\nOptions:\n";
+                std::cout << std::setprecision(1) << std::fixed;
+                std::cout << "\nHnefatafl\nCreator: Rasmus Schenström\nVersion: " << VERSION << "\n\nOptions:\n";
                 std::cout << "\t--help|-h \t                             \t- Change board size (Eg: 11x11)\n";
                 std::cout << "\t--size|-s \t[UN-EVEN NUM]x[UN-EVEN NUM] \t- Change board size (Eg: 11x11)\n";
                 std::cout << "\t--network|-n \t                          \t- Network mode\n" << std::endl;

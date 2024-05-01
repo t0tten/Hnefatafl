@@ -25,6 +25,7 @@ Networking::Networking(bool isServer)
 }
 
 Networking::~Networking() {
+    std::cout << "RUNNING FUNCTION!" << std::endl;
     this->closeConnection();
 }
 
@@ -39,8 +40,8 @@ bool Networking::connectTo(std::string ip_a)
         std::cout << "Couldn't connect to server...\n";
         return false;
     } else{
-        return true;
         this->connected = true;
+        return true;
     }
 }
 

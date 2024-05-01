@@ -8,6 +8,7 @@
 #include <vector>
 #include <iostream>
 #include <regex>
+#include <signal.h>
 
 #include "argumentParser.hpp"
 #include "configurations.hpp"
@@ -15,8 +16,18 @@
 #include "game.hpp"
 #include "network/networking.hpp"
 
+// FUNC
 Networking* setupNetwork(Configurations* configurations);
 char printRules(Configurations* configurations);
+
+// VAR
+Networking* networking = nullptr;
+
+void closeNetworking (int s)
+{
+    if (networking != nullptr) delete networking;
+    exit(1);
+}
 
 int main(int argc, const char * argv[]) {
     Logger::Initialize(Logger::LogLevel::WARNING);
@@ -25,10 +36,16 @@ int main(int argc, const char * argv[]) {
     Configurations* configurations = ArgumentParser::parseArguments(VERSION, argc, argv);
     if (configurations == nullptr) return 0;
     
-    Networking* networking = nullptr;
+    
     if (configurations->getIsNetworkEnabled())
     {
         networking = setupNetwork(configurations);
+
+        struct sigaction sigIntHandler;
+        sigIntHandler.sa_handler = closeNetworking;
+        sigemptyset(&sigIntHandler.sa_mask);
+        sigIntHandler.sa_flags = 0;
+        sigaction(SIGINT, &sigIntHandler, NULL);
     }
     
     char run = printRules(configurations);

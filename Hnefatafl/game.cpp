@@ -80,14 +80,14 @@ short Game::getPlayerTurn()
 
 std::string Game::gatherInput(Player* playerTurn)
 {
-    std::cout << "\nPlayer turn: " << playerTurn->getColor() << playerTurn->getName();
+    std::cout << "\nPlayer turn: " << playerTurn->getColor() << playerTurn->getName() << Constants::RESET_FORMATTING;
     if (this->isNetworkEnabled)
     {
-        if (this->getPlayerTurn() != this->configurations->getMe()) std::cout << " (OPPONENT)";
-        else                                                        std::cout << " (YOU)";
+        if (this->getPlayerTurn() != this->configurations->getMe()) std::cout << " (opponent)";
+        else                                                        std::cout << " (you)";
     }
+    std::cout << std::endl;
     
-    std::cout << Constants::RESET_FORMATTING << "\n";
     std::string input;
     if (this->isNetworkEnabled && this->getPlayerTurn() != this->configurations->getMe())
     {
@@ -204,6 +204,11 @@ std::vector<short> Game::processInput(Player* playerTurn, std::string input)
             message = playerTurn->getColor() + playerTurn->getName() + Constants::RESET_FORMATTING;
             if (this->checkWinner())
             {
+                if (this->isNetworkEnabled)
+                {
+                    if (this->getPlayerTurn() != this->configurations->getMe()) std::cout << " (opponent)";
+                    else                                                        std::cout << " (you)";
+                }
                 message += " HAS WON THE GAME!";
                 this->gameIsRunning = false;
             }

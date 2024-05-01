@@ -15,6 +15,8 @@
 #include "game.hpp"
 #include "network/networking.hpp"
 
+Networking* setupNetwork(Configurations* configurations);
+
 int main(int argc, const char * argv[]) {
     Logger::Initialize(Logger::LogLevel::WARNING);
     const float VERSION = 1.1;
@@ -26,47 +28,7 @@ int main(int argc, const char * argv[]) {
     Networking* networking = nullptr;
     if (configurations->getIsNetworkEnabled())
     {
-        std::string input = "";
-        std::cout << "\nNETWORK MODE\n";
-        std::cout << "Would you like to host the server? [Y/n]:  ";
-        getline(std::cin, input);
-        
-        if (std::regex_match(input, std::regex("y|Y")))
-        {
-            networking = new Networking(true);
-            networking->startSocket();
-            std::string size = std::to_string(configurations->getWidth()) + "x" + std::to_string(configurations->getHeight());
-            networking->sendMsg(size);
-            networking->recvMsg();
-            networking->sendMsg(std::to_string(configurations->getPlayerTurn()));
-        }
-        else if (std::regex_match(input, std::regex("n|N")))
-        {
-            std::cout << "Enter the IP-address of the host? [IPv4: X.X.X.X]:  ";
-            getline(std::cin, input);
-            if (std::regex_match(input, std::regex("[0-9]+\\.[0-9]+\\.[0-9]+\\.[0-9]+")))
-            {
-                networking = new Networking(false);
-                if (!networking->connectTo(input)) return 0;
-                
-                std::string size = networking->recvMsg();
-                ArgumentParser::setSize(configurations, size);
-                networking->sendMsg("ack");
-                std::string playerTurn = networking->recvMsg();
-                configurations->setPlayerTurn((short) std::stoi(playerTurn));
-                configurations->setMe((short) std::stoi(playerTurn) + 1);
-            }
-            else
-            {
-                std::cout << "Invalid option. Exiting...\n";
-                return 0;
-            }
-        }
-        else
-        {
-            std::cout << "Invalid option. Exiting...\n";
-            return 0;
-        }
+        networking = setupNetwork(configurations);
     }
     
     char run = 'y';
@@ -105,4 +67,53 @@ int main(int argc, const char * argv[]) {
     delete configurations;
     
     return 0;
+}
+
+Networking* setupNetwork(Configurations* configurations)
+{
+    Networking* networking = nullptr;
+    
+    std::string input = "";
+    std::cout << "\nNETWORK MODE\n";
+    std::cout << "Would you like to host the server? [Y/n]:  ";
+    getline(std::cin, input);
+    
+    if (std::regex_match(input, std::regex("y|Y")))
+    {
+        networking = new Networking(true);
+        networking->startSocket();
+        std::string size = std::to_string(configurations->getWidth()) + "x" + std::to_string(configurations->getHeight());
+        networking->sendMsg(size);
+        networking->recvMsg();
+        networking->sendMsg(std::to_string(configurations->getPlayerTurn()));
+    }
+    else if (std::regex_match(input, std::regex("n|N")))
+    {
+        std::cout << "Enter the IP-address of the host? [IPv4: X.X.X.X]:  ";
+        getline(std::cin, input);
+        if (std::regex_match(input, std::regex("[0-9]+\\.[0-9]+\\.[0-9]+\\.[0-9]+")))
+        {
+            networking = new Networking(false);
+            if (!networking->connectTo(input)) return 0;
+            
+            std::string size = networking->recvMsg();
+            ArgumentParser::setSize(configurations, size);
+            networking->sendMsg("ack");
+            std::string playerTurn = networking->recvMsg();
+            configurations->setPlayerTurn((short) std::stoi(playerTurn));
+            configurations->setMe((short) std::stoi(playerTurn) + 1);
+        }
+        else
+        {
+            std::cout << "Invalid option. Exiting...\n";
+            return 0;
+        }
+    }
+    else
+    {
+        std::cout << "Invalid option. Exiting...\n";
+        return 0;
+    }
+    
+    return networking;
 }

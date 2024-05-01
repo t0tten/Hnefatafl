@@ -87,6 +87,13 @@ Networking* setupNetwork(Configurations* configurations)
     
     if (std::regex_match(input, std::regex("y|Y")))
     {
+        std::cout << "Start as " << Constants::ATTACKER_COLOR << "ATTACKER" << Constants::RESET_FORMATTING << "? [Y/n]: ";
+        getline(std::cin, input);
+        if (std::regex_match(input, std::regex("n|N")))
+        {
+            configurations->setMe(configurations->getPlayerTurn());
+            std::cout << "You will start as " << Constants::DEFENDER_COLOR << "DEFENDER" << Constants::RESET_FORMATTING << ".\n\n";
+        }
         networking = new Networking(true);
         networking->startSocket();
         std::string size = std::to_string(configurations->getWidth()) + "x" + std::to_string(configurations->getHeight());
@@ -111,7 +118,7 @@ Networking* setupNetwork(Configurations* configurations)
                 networking->sendMsg("ack");
                 std::string playerTurn = networking->recvMsg();
                 configurations->setPlayerTurn((short) std::stoi(playerTurn));
-                configurations->setMe((short) std::stoi(playerTurn) + 1);
+                configurations->setMe((short) (std::stoi(playerTurn) + 1) % 2);
                 return networking;
             }
         }

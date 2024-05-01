@@ -81,17 +81,14 @@ short Game::getPlayerTurn()
 std::string Game::gatherInput(Player* playerTurn)
 {
     std::cout << "\nPlayer turn: " << playerTurn->getColor() << playerTurn->getName();
-    if (this->isNetworkEnabled && this->getPlayerTurn() != this->configurations->getMe())
+    if (this->isNetworkEnabled)
     {
-        std::cout << " (OPPONENT)";
-    } else
-    {
-        std::cout << " (YOU)";
+        if (this->getPlayerTurn() != this->configurations->getMe()) std::cout << " (OPPONENT)";
+        else                                                        std::cout << " (YOU)";
     }
     
     std::cout << Constants::RESET_FORMATTING << "\n";
     std::string input;
-    //std::cout << "playerTurn: " << this->getPlayerTurn() << ", me: " << this->configurations->getMe() << std::endl;
     if (this->isNetworkEnabled && this->getPlayerTurn() != this->configurations->getMe())
     {
         std::cout << "Waiting for opponent to finish the move...\n";
@@ -102,7 +99,6 @@ std::string Game::gatherInput(Player* playerTurn)
             this->gameIsRunning = false;
             this->networking->closeConnection();
         }
-        //std::cout << input << " - Got anything?\n";
     }
     else
     {
@@ -195,13 +191,7 @@ std::vector<short> Game::processInput(Player* playerTurn, std::string input)
         std::string message = this->checkInputs(isDefender, std::stoi(moveFrom.at(0)), std::stoi(moveFrom.at(1)), std::stoi(moveTo.at(0)), std::stoi(moveTo.at(1)));
         if (message == "")
         {
-            //std::cout << "playerTurn: " << this->getPlayerTurn() << ", me: " << this->configurations->getMe() << std::endl;
-            if (this->isNetworkEnabled && this->getPlayerTurn() == this->configurations->getMe())
-            {
-                //std::cout << "Sending!" << std::endl;
-                this->networking->sendMsg(input);
-            }
-            
+            if (this->isNetworkEnabled && this->getPlayerTurn() == this->configurations->getMe()) this->networking->sendMsg(input);
             this->board->movePiece(std::stoi(moveFrom.at(0)), std::stoi(moveFrom.at(1)), std::stoi(moveTo.at(0)), std::stoi(moveTo.at(1)));
             this->playerTurn++;
             

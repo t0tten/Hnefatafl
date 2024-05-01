@@ -25,7 +25,6 @@ Networking::Networking(bool isServer)
 }
 
 Networking::~Networking() {
-    std::cout << "RUNNING FUNCTION!" << std::endl;
     this->closeConnection();
 }
 

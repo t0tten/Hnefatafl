@@ -25,7 +25,7 @@ Networking::Networking(bool isServer)
 }
 
 Networking::~Networking() {
-    close(sockA);
+    this->closeConnection();
 }
 
 bool Networking::connectTo(std::string ip_a)
@@ -40,6 +40,7 @@ bool Networking::connectTo(std::string ip_a)
         return false;
     } else{
         return true;
+        this->connected = true;
     }
 }
 
@@ -55,6 +56,7 @@ void Networking::startSocket()
     char str[INET6_ADDRSTRLEN];
     inet_ntop(AF_INET6, &addressB.sin_addr, str, INET6_ADDRSTRLEN );
     std::cout << "Got connection from IPv4: " << inet_ntoa(addressB.sin_addr) << " , IPv6: " << str << std::endl;
+    this->connected = true;
 }
 
 int Networking::sendMsg(std::string message)
@@ -72,6 +74,23 @@ std::string Networking::recvMsg()
         char buffer[bufferSize] = { 0 };
         bytes = (int) recv((isServer) ? this->sockB : this->sockA, buffer, sizeof(buffer), 0);
         message += buffer;
+        
+        if (bytes == 0)
+        {
+            message = "lost";
+        }
     }
     return message;
+}
+
+void Networking::closeConnection()
+{
+    close(this->sockA);
+    if (isServer) close(this->sockB);
+    this->connected = false;
+}
+
+bool Networking::isConnected()
+{
+    return this->connected;
 }

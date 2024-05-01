@@ -20,6 +20,7 @@ private:
     sockaddr_in addressA, addressB;
     socklen_t sockBLen;
     bool isServer;
+    bool connected;
 
 public:
     Networking(bool isServer);
@@ -30,6 +31,9 @@ public:
     
     void startSocket();
     bool connectTo(std::string ip_a);
+    
+    void closeConnection();
+    bool isConnected();
 };
 
 #endif /* Server_hpp */

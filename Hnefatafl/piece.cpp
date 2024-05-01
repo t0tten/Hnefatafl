@@ -44,6 +44,7 @@ std::string Piece::getSign()
         case PieceType::KING:
             return "@";
         default:
+            return "";
             break;
     }
 }

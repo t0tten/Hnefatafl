@@ -96,6 +96,12 @@ std::string Game::gatherInput(Player* playerTurn)
     {
         std::cout << "Waiting for opponent to finish the move...\n";
         input = networking->recvMsg();
+        if (input == "lost")
+        {
+            std::cout << "Lost connection to the server\n";
+            this->gameIsRunning = false;
+            this->networking->closeConnection();
+        }
         //std::cout << input << " - Got anything?\n";
     }
     else

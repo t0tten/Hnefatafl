@@ -90,8 +90,15 @@ int main(int argc, const char * argv[]) {
         Game* game = new Game(configurations, networking);
         delete game;
         configurations->switchStartPlayer();
-        std::cout << "Play again? (Y/n): ";
-        std::cin >> run;
+        if (networking == nullptr || (networking != nullptr && networking->isConnected()))
+        {
+            std::cout << "Play again? (Y/n): ";
+            std::cin >> run;
+        } 
+        else
+        {
+            run = 'n';
+        }
     }
     
     if (networking != nullptr) delete networking;

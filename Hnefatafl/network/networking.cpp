@@ -15,10 +15,10 @@
 #include <chrono>
 #include <thread>
 
-Networking::Networking(bool isServer)
+Networking::Networking(bool isServer, Configurations* configurations)
 {
     this->isServer = isServer;
-    this->port = 8080;
+    this->port = configurations->getPort();
     this->sockA = socket(AF_INET, SOCK_STREAM, 0);
     this->addressA.sin_family = AF_INET;
     this->addressA.sin_port = htons(this->port);
@@ -51,7 +51,7 @@ void Networking::startSocket()
     bind(this->sockA, (struct sockaddr*)& this->addressA, sizeof(addressA));
     listen(sockA, 5);
 
-    std::cout << "Waiting for player to connect...\n";
+    std::cout << "Waiting for player to connect on port: " << this->port << "...\n";
     this->sockB = accept(sockA, (struct sockaddr *) &addressB, &sockBLen);
     char str[INET6_ADDRSTRLEN];
     inet_ntop(AF_INET6, &addressB.sin_addr, str, INET6_ADDRSTRLEN );

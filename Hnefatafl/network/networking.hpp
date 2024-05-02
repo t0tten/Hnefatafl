@@ -8,6 +8,8 @@
 #ifndef Server_hpp
 #define Server_hpp
 
+#include "../configurations.hpp"
+
 #include <unistd.h>
 #include <arpa/inet.h>
 #include <string>
@@ -23,7 +25,7 @@ private:
     bool connected;
 
 public:
-    Networking(bool isServer);
+    Networking(bool isServer, Configurations* configurations);
     ~Networking();
     
     int sendMsg(std::string message);

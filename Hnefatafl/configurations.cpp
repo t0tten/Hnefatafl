@@ -13,6 +13,7 @@ Configurations::Configurations()
     this->width = 11;
     this->height = 11;
     this->isNetworkMode = false;
+    this->port = 8080;
 }
 
 short Configurations::getPlayerTurn()
@@ -33,6 +34,11 @@ short Configurations::getWidth()
 short Configurations::getHeight()
 {
     return this->height;
+}
+
+int Configurations::getPort()
+{
+    return this->port;
 }
 
 bool Configurations::getIsNetworkEnabled()
@@ -64,6 +70,12 @@ void Configurations::setHeight(short height)
 {
     this->height = height;
 }
+
+void Configurations::setPort(int port)
+{
+    this->port = port;
+}
+
 void Configurations::setNetworkEnabled()
 {
     this->isNetworkMode = true;

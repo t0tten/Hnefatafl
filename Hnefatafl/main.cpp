@@ -18,7 +18,7 @@
 
 // FUNC
 Networking* setupNetwork(Configurations* configurations);
-char printRules(Configurations* configurations);
+std::string printRules(Configurations* configurations);
 
 // VAR
 Networking* networking = nullptr;
@@ -40,7 +40,8 @@ int main(int argc, const char * argv[]) {
     if (configurations->getIsNetworkEnabled())
     {
         networking = setupNetwork(configurations);
-
+        if (networking == nullptr) exit (1);
+        
         struct sigaction sigIntHandler;
         sigIntHandler.sa_handler = closeNetworking;
         sigemptyset(&sigIntHandler.sa_mask);
@@ -48,8 +49,8 @@ int main(int argc, const char * argv[]) {
         sigaction(SIGINT, &sigIntHandler, NULL);
     }
     
-    char run = printRules(configurations);
-    while (run == 'y' || run == 'Y')
+    std::string run = printRules(configurations);
+    while (std::regex_match(run, std::regex("y|Y")))
     {
         Game* game = new Game(configurations, networking);
         delete game;
@@ -57,8 +58,7 @@ int main(int argc, const char * argv[]) {
         if (!configurations->getIsNetworkEnabled())
         {
             std::cout << "Play again? (Y/n): ";
-            std::cin >> run;
-            std::cin.ignore();
+            getline(std::cin, run);
         }
         else
         {
@@ -72,9 +72,9 @@ int main(int argc, const char * argv[]) {
     return 0;
 }
 
-char printRules(Configurations* configurations)
+std::string printRules(Configurations* configurations)
 {
-    char run = 'y';
+    std::string run = "y";
     std::cout << Constants::CLEAR_SCREEN << "                       __   __ __  __ ____ _____ ______ ______ ______ _____ __\n";
     std::cout << "                      / /__/ /  | / / ___/  ___/  __  /__  __/  __  /  ___/  /\n";
     std::cout << "                     /  __  / /||/ / __//  __// /__/ /  / / / /__/ /  __//  /__\n";
@@ -88,8 +88,8 @@ char printRules(Configurations* configurations)
     std::cout << "The game is finished either by completing any of the objectives above or if all the opponents game pieces has been captured.\n\n";
     std::cout << "Current board size: " << std::to_string(configurations->getWidth()) << "x" << std::to_string(configurations->getHeight()) << "\n";
     std::cout << "Ready to play? (Y/n): ";
-    std::cin >> run;
-    std::cin.ignore();
+    getline(std::cin, run);
+    if (run == "") run = "y";
     return run;
 }
 
@@ -101,17 +101,17 @@ Networking* setupNetwork(Configurations* configurations)
     std::cout << "\nNETWORK MODE\n";
     std::cout << "Would you like to host the server? [Y/n]:  ";
     getline(std::cin, input);
+    if (input == "") input = "y";
     
     if (std::regex_match(input, std::regex("y|Y")))
     {
         std::cout << "Start as " << Constants::ATTACKER_COLOR << "ATTACKER" << Constants::RESET_FORMATTING << "? [Y/n]: ";
         getline(std::cin, input);
-        if (std::regex_match(input, std::regex("n|N")))
-        {
-            configurations->setMe((configurations->getPlayerTurn() + 1) % 2);
-            std::cout << "You will start as " << Constants::DEFENDER_COLOR << "DEFENDER" << Constants::RESET_FORMATTING << ".\n\n";
-        }
-        networking = new Networking(true);
+        if (input == "") input = "y";
+        if (std::regex_match(input, std::regex("n|N"))) configurations->setMe((configurations->getPlayerTurn() + 1) % 2);
+        std::string playAs = ((configurations->getMe() + 1) % 2 == 0) ? Constants::DEFENDER_COLOR + "DEFENDER" : Constants::ATTACKER_COLOR  + "ATTACKER";
+        std::cout << "You will start as " << playAs << Constants::RESET_FORMATTING << ".\n\n";
+        networking = new Networking(true, configurations);
         networking->startSocket();
         std::string size = std::to_string(configurations->getWidth()) + "x" + std::to_string(configurations->getHeight());
         
@@ -127,7 +127,7 @@ Networking* setupNetwork(Configurations* configurations)
         
         if (std::regex_match(input, std::regex("[0-9]+\\.[0-9]+\\.[0-9]+\\.[0-9]+")))
         {
-            networking = new Networking(false);
+            networking = new Networking(false, configurations);
             if (networking->connectTo(input))
             {
                 std::string size = networking->recvMsg();
@@ -141,5 +141,5 @@ Networking* setupNetwork(Configurations* configurations)
     }
     
     std::cout << "Invalid option. Exiting...\n";
-    return 0;
+    return nullptr;
 }

@@ -16,6 +16,7 @@ class Configurations
     short me;
     short width;
     short height;
+    int port;
     bool isNetworkMode;
     
 public:
@@ -26,6 +27,7 @@ public:
     short getMe();
     short getWidth();
     short getHeight();
+    int getPort();
     bool getIsNetworkEnabled();
     
     void switchStartPlayer();
@@ -33,6 +35,7 @@ public:
     void setMe(short playerTurn);
     void setWidth(short width);
     void setHeight(short height);
+    void setPort(int port);
     void setNetworkEnabled();
 };
 #endif /* configurations_hpp */

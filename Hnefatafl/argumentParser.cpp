@@ -12,6 +12,7 @@
 #include <iomanip>
 #include <regex>
 
+enum Argument {HELP, SIZE, NETWORK, PORT};
 ArgumentParser::ArgumentParser()
 {
     this->arguments = {
@@ -34,19 +35,19 @@ Configurations* ArgumentParser::parseArguments(const float VERSION, int argc, co
             short matchedArgumentIndex = argumentParser->matchArguments(argv[i]);
             switch (matchedArgumentIndex)
             {
-                case 0:
+                case Argument::HELP:
                     argumentParser->printHelp(VERSION);
                     delete configurations;
                     configurations = nullptr;
                     break;
-                case 1:
+                case Argument::SIZE:
                     if (!argumentParser->setSize(configurations, i, argc, argv)) matchedArgumentIndex = -1;
                     i++;
                     break;
-                case 2:
+                case Argument::NETWORK:
                     configurations->setNetworkEnabled();
                     break;
-                case 3:
+                case Argument::PORT:
                     if (!argumentParser->setPort(configurations, i, argc, argv)) matchedArgumentIndex = -1;
                     i++;
                     break;

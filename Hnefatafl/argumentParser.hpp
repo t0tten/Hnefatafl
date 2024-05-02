@@ -19,6 +19,8 @@ class ArgumentParser
         std::vector<std::array<std::string, 4>> arguments;
     
     ArgumentParser();
+    short matchArguments(std::string argument);
+    
     void printHelp(const float VERSION);
     bool setSize(Configurations*& configurations, int i, int argc, const char* argv[]);
     bool setPort(Configurations*& configurations, int i, int argc, const char* argv[]);

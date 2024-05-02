@@ -31,17 +31,8 @@ Configurations* ArgumentParser::parseArguments(const float VERSION, int argc, co
     {
         for (int i = 1; i < argc; i++)
         {
-            int parsedArgument = -1;
-            for (int j = 0; j < argumentParser->getArguments().size(); j++)
-            {
-                if (std::regex_match(argv[i], std::regex(argumentParser->getArguments().at(j)[0])))
-                {
-                    parsedArgument = j;
-                    break;
-                }
-            }
-            
-            switch (parsedArgument)
+            short matchedArgumentIndex = argumentParser->matchArguments(argv[i]);
+            switch (matchedArgumentIndex)
             {
                 case 0:
                     argumentParser->printHelp(VERSION);
@@ -49,21 +40,21 @@ Configurations* ArgumentParser::parseArguments(const float VERSION, int argc, co
                     configurations = nullptr;
                     break;
                 case 1:
-                    if (!argumentParser->setSize(configurations, i, argc, argv)) parsedArgument = -1;
+                    if (!argumentParser->setSize(configurations, i, argc, argv)) matchedArgumentIndex = -1;
                     i++;
                     break;
                 case 2:
                     configurations->setNetworkEnabled();
                     break;
                 case 3:
-                    if (!argumentParser->setPort(configurations, i, argc, argv)) parsedArgument = -1;
+                    if (!argumentParser->setPort(configurations, i, argc, argv)) matchedArgumentIndex = -1;
                     i++;
                     break;
                 default:
                     break;
             }
             
-            if (parsedArgument == -1)
+            if (matchedArgumentIndex == -1)
             {
                 delete configurations;
                 configurations = nullptr;
@@ -75,6 +66,20 @@ Configurations* ArgumentParser::parseArguments(const float VERSION, int argc, co
     
     delete argumentParser;;
     return configurations;
+}
+
+short ArgumentParser::matchArguments(std::string argument)
+{
+    short matchedArgumentIndex = -1;
+    for (int j = 0; j < getArguments().size(); j++)
+    {
+        if (std::regex_match(argument, std::regex(getArguments().at(j)[0])))
+        {
+            matchedArgumentIndex = j;
+            break;
+        }
+    }
+    return matchedArgumentIndex;
 }
 
 std::vector<std::array<std::string, 4>> ArgumentParser::getArguments()

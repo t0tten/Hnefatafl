@@ -17,7 +17,7 @@ ArgumentParser::ArgumentParser()
 {
     this->arguments = {
         {"--help|-h",       "                           ", "Display this help"                      },
-        {"--size|-s",       "<UN-EVEN NUM>x<UN-EVEN NUM>", "Change board size (Eg: 11x11)"          },
+        {"--size|-s",       "small|medium|large         ", "Change board size"                      },
         {"--network|-n",    "                           ", "Enable network mode"                    },
         {"--port|-p",       "<PORT_NO>                  ", "Set port number to use in network mode" }
     };
@@ -103,9 +103,10 @@ void ArgumentParser::printHelp(const float VERSION)
 
 bool ArgumentParser::setSize(Configurations*& configurations, int i, int argc, const char* argv[])
 {
-    if ((i + 1) < argc && std::regex_match(argv[i + 1], std::regex("[0-9]+x[0-9]+")))
+    //if ((i + 1) < argc && std::regex_match(argv[i + 1], std::regex("[0-9]+x[0-9]+")))
+    if ((i + 1) < argc && std::regex_match(argv[i + 1], std::regex("small|medium|large")))
     {
-        std::vector<std::string> dimensions = Game::splitString(argv[i + 1], "x");
+        //std::vector<std::string> dimensions = Game::splitString(argv[i + 1], "x");
         ArgumentParser::setSize(configurations, argv[i + 1]);
         return true;
     }
@@ -124,16 +125,21 @@ bool ArgumentParser::setPort(Configurations*& configurations, int i, int argc, c
 
 void ArgumentParser::setSize(Configurations*& configurations, std::string size)
 {
-    std::vector<std::string> dimensions = Game::splitString(size, "x");
+    std::vector<short> dimensions;
+    if (size == "small")
+    {
+        dimensions = {9, 9};
+    }
+    else if (size == "medium")
+    {
+        dimensions = {11, 11};
+    }
+    else if (size == "large")
+    {
+        dimensions = {19, 19};
+    }
     
-    short width = std::stoi(dimensions.at(0));
-    if (width % 2 == 0) width--;
-    if (width < 9) width = 9;
-    
-    short height = std::stoi(dimensions.at(1));
-    if (height % 2 == 0) height--;
-    if (height < 9) height = 9;
-    
-    configurations->setWidth(width);
-    configurations->setHeight(height);
+    configurations->setSizeText(size);
+    configurations->setWidth(dimensions[0]);
+    configurations->setHeight(dimensions[1]);
 }

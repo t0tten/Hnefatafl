@@ -9,6 +9,7 @@
 #define configurations_hpp
 
 #include <stdio.h>
+#include <string>
 
 class Configurations
 {
@@ -16,6 +17,7 @@ class Configurations
     short me;
     short width;
     short height;
+    std::string size;
     int port;
     bool isNetworkMode;
     
@@ -27,6 +29,7 @@ public:
     short getMe();
     short getWidth();
     short getHeight();
+    std::string getSizeText();
     int getPort();
     bool getIsNetworkEnabled();
     
@@ -35,6 +38,7 @@ public:
     void setMe(short playerTurn);
     void setWidth(short width);
     void setHeight(short height);
+    void setSizeText(std::string size);
     void setPort(int port);
     void setNetworkEnabled();
 };

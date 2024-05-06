@@ -12,6 +12,7 @@ Configurations::Configurations()
     this->playerTurn = this->me = 0;
     this->width = 11;
     this->height = 11;
+    this->size = "medium";
     this->isNetworkMode = false;
     this->port = 8080;
 }
@@ -34,6 +35,11 @@ short Configurations::getWidth()
 short Configurations::getHeight()
 {
     return this->height;
+}
+
+std::string Configurations::getSizeText()
+{
+    return this->size;
 }
 
 int Configurations::getPort()
@@ -69,6 +75,11 @@ void Configurations::setWidth(short width)
 void Configurations::setHeight(short height)
 {
     this->height = height;
+}
+
+void Configurations::setSizeText(std::string size)
+{
+    this->size = size;
 }
 
 void Configurations::setPort(int port)

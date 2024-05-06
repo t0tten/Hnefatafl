@@ -14,7 +14,7 @@
 class Player
 {
     public:
-        Player(short sizeWarriors, short width, short height);
+        Player(short width, short height);
         ~Player();
 
         Piece** getWarriors();
@@ -25,7 +25,7 @@ class Player
         virtual std::string getName();
     
     protected:
-        Player(short sizeWarriors, std::string color, bool isDefender, short width, short height);
+        Player(std::string color, bool isDefender, short width, short height);
         Piece** warriors;
         short sizeWarriors;
         short warriorsLeft;

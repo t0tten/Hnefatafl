@@ -30,10 +30,10 @@ Game::Game(Configurations* configurations, Networking* networking)
     this->gameIsRunning = true;
     this->isNetworkEnabled = configurations->getIsNetworkEnabled();
     
-    this->attacker = new Player(6*4, width, height);
+    this->attacker = new Player(width, height);
     this->attacker->placePieces();
     
-    this->defender = new Defender(12, width, height);
+    this->defender = new Defender(width, height);
     this->defender->placePieces();
     
     this->board = new Board(width, height);

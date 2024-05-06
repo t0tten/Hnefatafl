@@ -83,10 +83,10 @@ std::string printRules(Configurations* configurations)
     std::cout << "                                        -= " << Constants::FG_RED_BOLD << "R U L E S" << Constants::RESET_FORMATTING << " =-  \n\n";
     std::cout << "The objective for the " << Constants::DEFENDER_COLOR << "DEFENDER" << Constants::RESET_FORMATTING << " is to get the king (" << Constants::FG_RED_BOLD << "@" << Constants::RESET_FORMATTING  << ") to any of the corners of the board.\n";
     std::cout << "The objective for the " << Constants::ATTACKER_COLOR << "ATTACKER" << Constants::RESET_FORMATTING << " is to capture the king by putting four warriors (" << Constants::FG_RED_BOLD << "!" << Constants::RESET_FORMATTING << ") on each side, perpendicular, of the king (not diagonal).\n\n";
-    std::cout << "A warrior can be captured by putting two of the opponents warriors on opposite side of it.\n";
-    std::cout << "Warriors can only move in straight lines and can not be placed on a kings square (" << Constants::FG_RED_BOLD << "X" << Constants::RESET_FORMATTING << ").\n\n";
+    std::cout << "A warrior can be captured by putting two of the opponents warriors on opposite side of it or by trapping it between a warrior and a kings square.\n";
+    std::cout << "Warriors can only move in straight lines and can not be placed on a kings square (" << Constants::FG_RED_BOLD << "X" << Constants::RESET_FORMATTING << ") nor walk throught them.\n\n";
     std::cout << "The game is finished either by completing any of the objectives above or if all the opponents game pieces has been captured.\n\n";
-    std::cout << "Current board size: " << std::to_string(configurations->getWidth()) << "x" << std::to_string(configurations->getHeight()) << "\n";
+    std::cout << "Current board size: " << std::to_string(configurations->getWidth()) << "x" << std::to_string(configurations->getHeight()) << " (" << configurations->getSizeText() << ")\n";
     std::cout << "Ready to play? (Y/n): ";
     getline(std::cin, run);
     if (run == "") run = "y";

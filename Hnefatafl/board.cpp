@@ -194,6 +194,7 @@ void Board::placePiecesOnBoard(Piece* piece)
 
 void Board::placePlayerPiecesOnBoard(Player* player)
 {
+    std::cout << player->getSize() << std::endl;
     Piece** playerWarriors = player->getWarriors();
     for (int i = 0; i < player->getSize(); i++)
     {
@@ -246,7 +247,7 @@ bool Board::checkFreePath(short fromX, short fromY, short toX, short toY)
             {
                 for (int x = (fromX - 1); x >= toX; x--)
                 {
-                    if (this->board[x][toY] != nullptr)
+                    if (this->board[x][toY] != nullptr || (this->isKingsSquare(x, toY) && !this->board[fromX][fromY]->isKing()))
                     {
                         return false;
                     }
@@ -260,7 +261,7 @@ bool Board::checkFreePath(short fromX, short fromY, short toX, short toY)
             {
                 for (int x = (fromX + 1); x <= toX; x++)
                 {
-                    if (this->board[x][toY] != nullptr)
+                    if (this->board[x][toY] != nullptr || (this->isKingsSquare(x, toY) && !this->board[fromX][fromY]->isKing()))
                     {
                         return false;
                     }
@@ -277,7 +278,7 @@ bool Board::checkFreePath(short fromX, short fromY, short toX, short toY)
             {
                 for (int y = (fromY - 1); y >= toY; y--)
                 {
-                    if (this->board[toX][y] != nullptr)
+                    if (this->board[toX][y] != nullptr || (this->isKingsSquare(toX, y) && !this->board[fromX][fromY]->isKing()))
                     {
                         return false;
                     }
@@ -291,7 +292,7 @@ bool Board::checkFreePath(short fromX, short fromY, short toX, short toY)
             {
                 for (int y = (fromY + 1); y <= toY; y++)
                 {
-                    if (this->board[toX][y] != nullptr)
+                    if (this->board[toX][y] != nullptr || (this->isKingsSquare(toX, y) && !this->board[fromX][fromY]->isKing()))
                     {
                         return false;
                     }
@@ -454,7 +455,8 @@ bool Board::checkCaptureAbove(bool isDefender, short toX, short toY)
             (this->board[toX][toY - 1]->isDefender() != isDefender) &&
             !this->board[toX][toY - 1]->isKing())
         {
-            if ((this->board[toX][toY - 2] != nullptr) && (this->board[toX][toY - 2]->isDefender() == isDefender))
+            if (((this->board[toX][toY - 2] != nullptr) && 
+                 (this->board[toX][toY - 2]->isDefender() == isDefender)) || this->isKingsSquare(toX, toY - 2))
             {
                 return true;
             }
@@ -471,7 +473,8 @@ bool Board::checkCaptureBelow(bool isDefender, short toX, short toY)
             (this->board[toX][toY + 1]->isDefender() != isDefender) &&
             !this->board[toX][toY + 1]->isKing())
         {
-            if ((this->board[toX][toY + 2] != nullptr) && (this->board[toX][toY + 2]->isDefender() == isDefender))
+            if (((this->board[toX][toY + 2] != nullptr) && 
+                 (this->board[toX][toY + 2]->isDefender() == isDefender)) || this->isKingsSquare(toX, toY + 2))
             {
                 return true;
             }
@@ -484,11 +487,12 @@ bool Board::checkCaptureRight(bool isDefender, short toX, short toY)
 {
     if ((toX + 2) < this->width)
     {
-        if ((this->board[toX + 1][toY] != nullptr) && 
+        if ((this->board[toX + 1][toY] != nullptr) &&
             (this->board[toX + 1][toY]->isDefender() != isDefender) &&
             !this->board[toX + 1][toY]->isKing())
         {
-            if ((this->board[toX + 2][toY] != nullptr) && (this->board[toX + 2][toY]->isDefender() == isDefender))
+            if (((this->board[toX + 2][toY] != nullptr) && 
+                 (this->board[toX + 2][toY]->isDefender() == isDefender)) || this->isKingsSquare(toX + 2, toY))
             {
                 return true;
             }
@@ -505,7 +509,8 @@ bool Board::checkCaptureLeft(bool isDefender, short toX, short toY)
             (this->board[toX - 1][toY]->isDefender() != isDefender) &&
             !this->board[toX - 1][toY]->isKing())
         {
-            if ((this->board[toX - 2][toY] != nullptr) && (this->board[toX - 2][toY]->isDefender() == isDefender))
+            if (((this->board[toX - 2][toY] != nullptr) && 
+                 (this->board[toX - 2][toY]->isDefender() == isDefender)) || this->isKingsSquare(toX - 2, toY))
             {
                 return true;
             }

@@ -113,9 +113,7 @@ Networking* setupNetwork(Configurations* configurations)
         std::cout << "You will start as " << playAs << Constants::RESET_FORMATTING << ".\n\n";
         networking = new Networking(true, configurations);
         networking->startSocket();
-        std::string size = std::to_string(configurations->getWidth()) + "x" + std::to_string(configurations->getHeight());
-        
-        networking->sendMsg(size);
+        networking->sendMsg(configurations->getSizeText());
         networking->recvMsg();
         networking->sendMsg(std::to_string(configurations->getMe()));
         return networking;

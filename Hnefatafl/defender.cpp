@@ -9,7 +9,6 @@
 
 #include "constants.hpp"
 #include "defender.hpp"
-#include <iostream>
 
 Defender::Defender(short width, short height) : Player(Constants::DEFENDER_COLOR, true, width, height)
 {

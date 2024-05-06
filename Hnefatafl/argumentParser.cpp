@@ -16,10 +16,10 @@ enum Argument {HELP, SIZE, NETWORK, PORT};
 ArgumentParser::ArgumentParser()
 {
     this->arguments = {
-        {"--help|-h",       "                           ", "Display this help"                      },
-        {"--size|-s",       "small|medium|large         ", "Change board size"                      },
-        {"--network|-n",    "                           ", "Enable network mode"                    },
-        {"--port|-p",       "<PORT_NO>                  ", "Set port number to use in network mode" }
+        {"--help    |-h", "                                    ", "Display this help"                      },
+        {"--size    |-s", "small|medium(default)|large         ", "Change board size"                      },
+        {"--network |-n", "                                    ", "Enable network mode"                    },
+        {"--port    |-p", "<PORT_NO>                           ", "Set port number to use in network mode" }
     };
 }
 

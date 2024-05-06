@@ -14,7 +14,7 @@ Configurations::Configurations()
     this->height = 11;
     this->size = "medium";
     this->isNetworkMode = false;
-    this->port = 8080;
+    this->port = 27925;
 }
 
 short Configurations::getPlayerTurn()
